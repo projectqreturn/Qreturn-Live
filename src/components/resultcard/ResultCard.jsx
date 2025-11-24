@@ -7,6 +7,7 @@ export default function ResultCard({
   price,
   location,
   date,
+  isVerified = false,
 }) {
   return (
     <div className="flex bg-[#EEF1F7] rounded-xl p-3 gap-4 items-start shadow-sm hover:shadow-md transition cursor-pointer">
@@ -26,10 +27,12 @@ export default function ResultCard({
 
         {/* Tags */}
         <div className="flex gap-2 items-center mt-1">
-          <span className="flex items-center gap-1 text-xs py-0.5  text-gray-600">
-            Verified User
-            <CheckCircle size={14} className="text-blue-500" />
-          </span>
+          {isVerified && (
+            <span className="flex items-center gap-1 text-xs py-0.5  text-gray-600">
+              Verified User
+              <CheckCircle size={14} className="text-blue-500" />
+            </span>
+          )}
 
           <span className="flex items-center gap-1 text-xs py-0.5 text-gray-600">
             Reward

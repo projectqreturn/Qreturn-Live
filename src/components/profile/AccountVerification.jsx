@@ -28,9 +28,12 @@ export default function AccountVerification() {
         const response = await fetch(`/api/user?clerkId=${user.id}`);
         
         if (response.ok) {
-          const data = await response.json();
-          if (data.user) {
-            setIsVerified(data.user.isVerified || false);
+          const userData = await response.json();
+          console.log("Fetched user data:", userData);
+          // API returns user object directly, not wrapped in { user: ... }
+          if (userData) {
+            setIsVerified(userData.isVerified || false);
+            console.log("User verification status:", userData.isVerified);
           }
         }
       } catch (error) {

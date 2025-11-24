@@ -70,6 +70,7 @@ const Page = () => {
   const [alertMessage, setAlertMessage] = useState("");
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [postOwnerVerified, setPostOwnerVerified] = useState(false);
   
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -109,6 +110,19 @@ const Page = () => {
         } else {
           setIsAuthorized(false);
           setAlertMessage("You are not authorized to view this chat.");
+        }
+
+        // Fetch post owner verification status
+        if (data.postOwnerUserId) {
+          try {
+            const userResponse = await fetch(`/api/user?clerkId=${data.postOwnerUserId}`);
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+              setPostOwnerVerified(userData?.user?.isVerified || false);
+            }
+          } catch (error) {
+            console.error("Error fetching post owner verification:", error);
+          }
         }
       } else {
         console.log("No such chat room!");
@@ -378,10 +392,12 @@ const Page = () => {
               </h4>
               <div className="flex flex-wrap gap-4 mt-1">
                 <p className="text-xs text-gray-400">{getOtherUserEmail()}</p>
-                <div className="flex items-center space-x-1">
-                  <p className="text-xs text-gray-300">Verified User</p>
-                  <HiCheckBadge color="#308AFF" />
-                </div>
+                {postOwnerVerified && (
+                  <div className="flex items-center space-x-1">
+                    <p className="text-xs text-gray-300">Verified User</p>
+                    <HiCheckBadge color="#308AFF" />
+                  </div>
+                )}
                 <div className="flex items-center space-x-1">
                   <p className="text-xs text-gray-300">Reward</p>
                   <BiSolidBadgeDollar color="#B03EFC" />

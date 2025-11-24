@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import ImageCarousel from "@/components/Carousel/Carousel";
 import Gmap2 from "@/components/map/Gmap2";
-import { MdOutlineReport } from "react-icons/md";
+import { MdOutlineReport, MdVerified } from "react-icons/md";
 import { IoChatboxEllipses } from "react-icons/io5";
 import { useParams } from "next/navigation";
 
@@ -209,6 +209,12 @@ const navigateToChat = async () => {
         <div className="max-w-md lg:max-w-2xl mb-3">
           <div>
             <h3 className="text-left font-semibold mt-5 mb-2">Think it&apos;s yours? Contact</h3>
+            {post.is_verified && (
+              <div className="flex items-center gap-1 mb-2">
+                <MdVerified className="text-blue-500" size={18} />
+                <span className="text-sm text-gray-600">Verified User</span>
+              </div>
+            )}
             <p className="text-left">Phone: <span className="text-blue-500 font-bold">{post.phone}</span></p>
             <p className="text-left">Email: <span className="text-blue-500 font-bold">{post.email}</span></p>
           </div>

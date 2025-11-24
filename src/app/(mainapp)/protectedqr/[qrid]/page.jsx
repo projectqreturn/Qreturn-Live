@@ -307,10 +307,12 @@ const Page = () => {
               <p className="text-xs text-gray-400 mt-1">
                 Category: {item.Category} • ID: {item.myItemsId}
               </p>
-              <div className="flex items-center justify-center gap-1 mt-1 text-xs text-gray-300">
-                <p>Verified User</p>
-                <HiCheckBadge color="#308AFF" />
-              </div>
+              {itemOwnerData?.isVerified && (
+                <div className="flex items-center justify-center gap-1 mt-1 text-xs text-gray-300">
+                  <p>Verified User</p>
+                  <HiCheckBadge color="#308AFF" />
+                </div>
+              )}
             </div>
 
             {/* Status Card */}
