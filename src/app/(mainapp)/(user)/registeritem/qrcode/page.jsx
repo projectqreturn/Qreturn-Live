@@ -12,6 +12,7 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [itemId, setItemId] = useState(null);
+  const [qrValue, setQrValue] = useState("https://qreturn.vercel.app");
 
   // Read query param on client-side only to avoid useSearchParams CSR bailout
   useEffect(() => {
@@ -19,10 +20,12 @@ export default function Page() {
     const params = new URL(window.location.href).searchParams;
     const id = params.get("itemId");
     setItemId(id);
+    
+    // Set QR value with the origin and itemId
+    if (id) {
+      setQrValue(`${window.location.origin}/protectedqr/${id}`);
+    }
   }, []);
-
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const qrValue = itemId ? `${origin}/protectedqr/${itemId}` : "https://qreturn.vercel.app";
 
   useEffect(() => {
     const fetchItem = async () => {

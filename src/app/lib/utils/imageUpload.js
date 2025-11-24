@@ -54,7 +54,7 @@ export async function uploadMainImageToExternalApi(imageUrl, postType) {
     formData.append('file', renamedFile);
 
     // Upload to external API
-    const baseUrl = process.env.NEXT_PUBLIC_IMAGE_API_URL || 'http://18.136.211.184:8000';
+    const baseUrl = process.env.NEXT_PUBLIC_IMAGE_API_URL || 'http://13.229.70.244:8000';
     const uploadUrl = `${baseUrl}/upload-image`;
     console.log('Uploading to external API:', uploadUrl);
     
