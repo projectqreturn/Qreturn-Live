@@ -45,7 +45,7 @@ export default function Home() {
               reunite found belongings with their owners. <br />
               Let&apos;s make lost and found easy!
             </p>
-            {/* Button */}
+            {/* live Button */}
             <div>
               <LiveButton />
             </div>
