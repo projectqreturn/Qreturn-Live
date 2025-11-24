@@ -1,0 +1,62 @@
+.postCard {
+    background-color: rgba(224, 224, 224, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: all 0.3s ease;
+  }
+  
+  .postCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  }
+  
+  .shineBorder {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .shineBorder::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(255, 255, 255, 0.2), 
+      transparent
+    );
+    transform: translateX(-100%);
+  }
+  
+  .shineBorder:hover::after {
+    animation: shine 1.5s ease-out;
+  }
+  
+  @keyframes shine {
+    to {
+      transform: translateX(100%);
+    }
+  }
+  
+  .badgeVerified {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(45deg, #3498db, #2980b9);
+  }
+  
+  .badgeReward {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(45deg, #9b59b6, #8e44ad);
+  }
+  
+  .imageScale {
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .postCard:hover .imageScale {
+    transform: scale(1.03);
+  }
+

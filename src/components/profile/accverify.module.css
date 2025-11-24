@@ -1,0 +1,16 @@
+.badgeVerified {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(45deg, #3498db, #2980b9);
+    transform: scale(1.2); /* Scale up by 20% */
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.7); /* Add blue glow effect */
+    animation: blueGradientShift 3s ease infinite; /* Add blue gradient animation */
+    border-radius: 4px;
+    padding: 5px 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+}
+
+/* Blue gradient animation */

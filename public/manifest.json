@@ -1,0 +1,49 @@
+{
+  "name": "Qreturn - Lost & Found",
+  "short_name": "Qreturn",
+  "description": "Find and return lost items with QR code technology",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/icons/100.png", "sizes": "100x100", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/128.png", "sizes": "128x128", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/144.png", "sizes": "144x144", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/152.png", "sizes": "152x152", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/167.png", "sizes": "167x167", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/256.png", "sizes": "256x256", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/screenshot1.png",
+      "sizes": "540x720",
+      "type": "image/png"
+    },
+    {
+      "src": "/screenshots/screenshot2.png",
+      "sizes": "540x720",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Report Lost Item",
+      "short_name": "Report",
+      "description": "Report a lost item",
+      "url": "/createpost?type=lost",
+      "icons": [{ "src": "/icons/100.png", "sizes": "100x100" }]
+    },
+    {
+      "name": "Report Found Item",
+      "short_name": "Found",
+      "description": "Report a found item",
+      "url": "/createpost?type=found",
+      "icons": [{ "src": "/icons/100.png", "sizes": "100x100" }]
+    }
+  ]
+}
