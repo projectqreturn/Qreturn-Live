@@ -3,18 +3,26 @@ import React, { useRef, useState, useEffect } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import jsPDF from "jspdf";
 import { MdOutlineFileDownload } from "react-icons/md";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
   const qrRef = useRef();
-  const searchParams = useSearchParams();
   const router = useRouter();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  
-  const itemId = searchParams.get('itemId');
-  const qrValue = itemId ? `${window.location.origin}/protectedqr/${itemId}` : "https://qreturn.vercel.app";
+  const [itemId, setItemId] = useState(null);
+
+  // Read query param on client-side only to avoid useSearchParams CSR bailout
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URL(window.location.href).searchParams;
+    const id = params.get("itemId");
+    setItemId(id);
+  }, []);
+
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const qrValue = itemId ? `${origin}/protectedqr/${itemId}` : "https://qreturn.vercel.app";
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -26,9 +34,9 @@ export default function Page() {
 
       try {
         const response = await fetch(`/api/myitems?id=${itemId}`);
-        
+
         if (!response.ok) {
-          throw new Error('Failed to fetch item details');
+          throw new Error("Failed to fetch item details");
         }
 
         const itemData = await response.json();
