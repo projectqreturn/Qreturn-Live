@@ -19,6 +19,13 @@ export default function Page() {
     if (typeof window === "undefined") return;
     const params = new URL(window.location.href).searchParams;
     const id = params.get("itemId");
+    
+    if (!id) {
+      setError("No item ID provided");
+      setLoading(false);
+      return;
+    }
+    
     setItemId(id);
     
     // Set QR value with the origin and itemId
@@ -28,13 +35,12 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    const fetchItem = async () => {
-      if (!itemId) {
-        setError("No item ID provided");
-        setLoading(false);
-        return;
-      }
+    // Only run fetch when itemId has been set (not null)
+    if (!itemId) {
+      return;
+    }
 
+    const fetchItem = async () => {
       try {
         const response = await fetch(`/api/myitems?id=${itemId}`);
 
@@ -44,10 +50,10 @@ export default function Page() {
 
         const itemData = await response.json();
         setItem(itemData);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching item:", error);
         setError("Failed to load item details");
-      } finally {
         setLoading(false);
       }
     };
