@@ -11,6 +11,7 @@ import { useUser } from "@clerk/nextjs";
 import GmapLocationFetch from "@/components/map/NewGmapLocationFetch";
 import { FaLocationArrow } from "react-icons/fa6";
 import toast, { Toaster } from 'react-hot-toast';
+import { deleteImageFromExternalApi } from "@/app/lib/utils/imageDelete";
 
 const Page = () => {
   const router = useRouter();
@@ -191,6 +192,12 @@ const Page = () => {
 
   const handleDeleteItem = async (itemId) => {
     try {
+      // Find the item to get its search_Id
+      const itemToDelete = items.find(item => item.myItemsId === itemId);
+      
+      toast.loading("Deleting item...");
+
+      // Delete from database
       const response = await fetch(`/api/myitems?id=${itemId}`, {
         method: 'DELETE',
       });
@@ -199,10 +206,27 @@ const Page = () => {
         throw new Error('Failed to delete item');
       }
 
+      // Delete image from external API if search_Id exists
+      if (itemToDelete?.search_Id) {
+        console.log("Deleting image from external API with search_Id:", itemToDelete.search_Id);
+        const imageDeleteResult = await deleteImageFromExternalApi(itemToDelete.search_Id);
+        
+        if (imageDeleteResult.success) {
+          console.log("Image deleted successfully from external API");
+        } else {
+          console.warn("Failed to delete image from external API:", imageDeleteResult.message);
+        }
+      }
+
+      toast.dismiss();
+      toast.success("Item deleted successfully");
+
       // Remove item from local state
       setItems(items.filter(item => item.myItemsId !== itemId));
     } catch (error) {
       console.error("Error deleting item:", error);
+      toast.dismiss();
+      toast.error("Failed to delete item");
       setError("Failed to delete item");
     }
   };
