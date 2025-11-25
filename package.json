@@ -11,7 +11,6 @@
   "dependencies": {
     "@clerk/nextjs": "^6.12.10",
     "@clerk/themes": "^2.2.24",
-    "@dataconnect/generated": "file:src/dataconnect-generated",
     "@google/genai": "^1.29.1",
     "@google/generative-ai": "^0.24.1",
     "@heroicons/react": "^2.2.0",
