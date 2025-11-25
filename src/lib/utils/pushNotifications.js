@@ -107,20 +107,23 @@ export async function subscribeToPushNotifications(vapidPublicKey) {
 
 /**
  * Send subscription to your backend server
- * @param {PushSubscription} subscription - The push subscription object
+ * @param {Object} params - Subscription parameters
+ * @param {PushSubscription} params.subscription - The push subscription object
+ * @param {string} params.fcmToken - FCM token if available
  */
-export async function sendSubscriptionToServer(subscription) {
+export async function sendSubscriptionToServer({ subscription, fcmToken }) {
   try {
     const response = await fetch('/api/push/subscribe', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(subscription),
+      body: JSON.stringify({ subscription, fcmToken }),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to send subscription to server');
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to send subscription to server');
     }
 
     const data = await response.json();
