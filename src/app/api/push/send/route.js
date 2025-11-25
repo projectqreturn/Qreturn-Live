@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import webpush from 'web-push';
+import connectToDatabase from '@/app/lib/db';
 
 /**
  * API endpoint to send push notifications
@@ -47,7 +48,6 @@ export async function POST(request) {
     }
 
     // Get user subscriptions from database
-    const connectToDatabase = (await import('@/app/lib/db')).default;
     const db = await connectToDatabase();
     
     const subscriptions = await db.collection('pushSubscriptions').find({
