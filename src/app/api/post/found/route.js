@@ -5,7 +5,8 @@ import FoundPost from "../../../lib/modals/foundPost.modal";
 import { connect } from "../../../lib/db";
 import { uploadMainImageToExternalApi } from "../../../lib/utils/imageUpload";
 import { deleteImageFromExternalApi } from "../../../lib/utils/imageDelete";
-import { getUserByEmail } from "../../../lib/actions/user.action";
+import { getUserByEmail, getNearbyUsers } from "../../../lib/actions/user.action";
+import { bulkCreateNotifications, NOTIFICATION_TYPES } from "../../../lib/notification/notification";
 
 
 
@@ -148,6 +149,66 @@ export async function POST(req) {
       if (!foundPost) return NextResponse.json({ message: "Failed to create" }, { status: 500 });
 
       console.log('Found post created successfully with search_Id:', foundPost.search_Id);
+
+      // Notify nearby users about the new found post
+      try {
+        console.log("========== NOTIFICATION PROCESS START (FOUND) ==========");
+        console.log("Finding nearby users for GPS:", postData.gps);
+        console.log("Post creator email:", email);
+        
+        // Get the post creator's clerkId to exclude them from notifications
+        const postCreator = await getUserByEmail(email);
+        console.log("Post creator found:", postCreator ? "Yes" : "No");
+        console.log("Creator clerkId:", postCreator?.clerkId);
+        
+        const creatorClerkId = postCreator?.clerkId;
+        
+        // Get users within 10km radius
+        console.log("Searching for users within 10km of:", postData.gps);
+        const nearbyUsers = await getNearbyUsers(postData.gps, 10, creatorClerkId);
+        console.log(`Found ${nearbyUsers.length} nearby users within 10km`);
+        
+        if (nearbyUsers.length > 0) {
+          console.log("Nearby users details:", nearbyUsers.map(u => ({
+            clerkId: u.clerkId,
+            email: u.email,
+            gps: u.gps,
+            distance: u.distance?.toFixed(2) + " km"
+          })));
+        }
+
+        if (nearbyUsers.length > 0) {
+          // Create notifications for all nearby users
+          const notifications = nearbyUsers.map(user => ({
+            userId: user.clerkId,
+            type: NOTIFICATION_TYPES.ITEM_FOUND,
+            title: `Found Item Nearby: ${title}`,
+            message: `Someone found a ${title} near your location in ${District}`,
+            data: {
+              postId: foundPost.foundPostId,
+              category: Category,
+              location: District,
+              distance: `${user.distance.toFixed(1)} km away`
+            },
+            link: `/found/${foundPost.foundPostId}`,
+            priority: 'medium'
+          }));
+
+          // Send bulk notifications
+          console.log("Creating notifications:", notifications.length);
+          const notificationIds = await bulkCreateNotifications(notifications);
+          console.log(`✅ Successfully sent ${notificationIds.length} notifications to nearby users`);
+          console.log("Notification IDs:", notificationIds);
+        } else {
+          console.log("⚠️ No nearby users found within 10km radius");
+        }
+        console.log("========== NOTIFICATION PROCESS END (FOUND) ==========");
+      } catch (notifyError) {
+        // Log error but don't fail the post creation
+        console.error("❌ Error notifying nearby users:", notifyError);
+        console.error("Error stack:", notifyError.stack);
+      }
+
       return NextResponse.json({ message: "found post created", foundPost }, { status: 201 });
     }
   } catch (error) {

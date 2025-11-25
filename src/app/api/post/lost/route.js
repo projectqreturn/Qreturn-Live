@@ -141,12 +141,12 @@ export async function POST(req) {
             title: `Lost Item Nearby: ${title}`,
             message: `Someone lost a ${title} near your location in ${District}`,
             data: {
-              postId: createdPost._id.toString(),
+              postId: createdPost.lostPostId,
               category: Category,
               location: District,
               distance: `${user.distance.toFixed(1)} km away`
             },
-            link: `/lost/${createdPost._id}`,
+            link: `/lost/${createdPost.lostPostId}`,
             priority: 'medium'
           }));
 
