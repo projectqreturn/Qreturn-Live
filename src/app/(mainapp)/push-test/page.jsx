@@ -21,6 +21,11 @@ export default function PushTestPage() {
     addLog(`Browser supported: ${isSupported}`);
     addLog(`Notification permission: ${permission}`);
     addLog(`Is subscribed: ${isSubscribed}`);
+    
+    // Auto-prompt for permission if not asked yet
+    if (isSupported && permission === 'default' && !isSubscribed) {
+      addLog('Permission not yet requested - click Subscribe button to enable', 'warning');
+    }
   }, [isSupported, permission, isSubscribed]);
 
   const handleSubscribe = async () => {
