@@ -3,6 +3,8 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import PWARegistration from "@/components/pwa/PWARegistration";
+import PushNotificationProvider from "@/app/lib/notification/PushNotificationProvider";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -63,7 +65,10 @@ export default function RootLayout({ children }) {
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <PWARegistration />
-          {children}
+          <PushNotificationProvider>
+            <Toaster position="top-right" />
+            {children}
+          </PushNotificationProvider>
         </body>
       </html>
     </ClerkProvider>

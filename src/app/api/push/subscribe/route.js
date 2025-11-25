@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import connectToDatabase from '@/app/lib/db';
 
 /**
  * API endpoint to handle push notification subscriptions
@@ -6,46 +8,51 @@ import { NextResponse } from 'next/server';
  */
 export async function POST(request) {
   try {
-    const subscription = await request.json();
-
-    // Validate subscription object
-    if (!subscription || !subscription.endpoint) {
+    const { userId } = await auth();
+    
+    if (!userId) {
       return NextResponse.json(
-        { error: 'Invalid subscription object' },
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const { subscription, fcmToken } = await request.json();
+
+    // Validate subscription object or FCM token
+    if (!subscription && !fcmToken) {
+      return NextResponse.json(
+        { error: 'Subscription or FCM token required' },
         { status: 400 }
       );
     }
 
-    console.log('Received push subscription:', subscription);
+    console.log('Received push subscription for user:', userId);
 
-    // TODO: Store the subscription in your database
-    // Example structure:
-    // {
-    //   userId: user.id, // Get from auth session
-    //   endpoint: subscription.endpoint,
-    //   keys: subscription.keys,
-    //   createdAt: new Date(),
-    // }
+    const db = await connectToDatabase();
 
-    // For now, we'll just log it
-    // You should implement database storage here
-    // Example with MongoDB:
-    /*
-    const { userId } = await auth(); // Get user ID from Clerk
-    
+    // Store or update the subscription in MongoDB
+    const subscriptionData = {
+      userId,
+      endpoint: subscription?.endpoint || null,
+      keys: subscription?.keys || null,
+      fcmToken: fcmToken || null,
+      expirationTime: subscription?.expirationTime || null,
+      userAgent: request.headers.get('user-agent'),
+      updatedAt: new Date(),
+    };
+
+    // Update or insert subscription
     await db.collection('pushSubscriptions').updateOne(
       { userId },
       { 
-        $set: {
-          userId,
-          endpoint: subscription.endpoint,
-          keys: subscription.keys,
-          updatedAt: new Date()
-        }
+        $set: subscriptionData,
+        $setOnInsert: { createdAt: new Date() }
       },
       { upsert: true }
     );
-    */
+
+    console.log('Push subscription saved for user:', userId);
 
     return NextResponse.json(
       { 

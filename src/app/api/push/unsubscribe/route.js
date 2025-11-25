@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import connectToDatabase from '@/app/lib/db';
 
 /**
  * API endpoint to handle push notification unsubscriptions
@@ -6,27 +8,34 @@ import { NextResponse } from 'next/server';
  */
 export async function POST(request) {
   try {
-    const { endpoint } = await request.json();
-
-    if (!endpoint) {
+    const { userId } = await auth();
+    
+    if (!userId) {
       return NextResponse.json(
-        { error: 'Endpoint is required' },
-        { status: 400 }
+        { error: 'Unauthorized' },
+        { status: 401 }
       );
     }
 
-    console.log('Unsubscribing endpoint:', endpoint);
+    const { endpoint } = await request.json();
 
-    // TODO: Remove the subscription from your database
-    // Example with MongoDB:
-    /*
-    const { userId } = await auth(); // Get user ID from Clerk
-    
-    await db.collection('pushSubscriptions').deleteOne({
-      userId,
-      endpoint
-    });
-    */
+    console.log('Unsubscribing user:', userId, endpoint ? `with endpoint: ${endpoint}` : '');
+
+    const db = await connectToDatabase();
+
+    // Remove the subscription from database
+    if (endpoint) {
+      // Remove specific endpoint
+      await db.collection('pushSubscriptions').deleteOne({
+        userId,
+        endpoint
+      });
+    } else {
+      // Remove all subscriptions for user
+      await db.collection('pushSubscriptions').deleteMany({
+        userId
+      });
+    }
 
     return NextResponse.json(
       { 

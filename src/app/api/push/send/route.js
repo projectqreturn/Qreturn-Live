@@ -29,7 +29,7 @@ if (vapidPublicKey && vapidPrivateKey) {
 
 export async function POST(request) {
   try {
-    const { title, body, url, userId } = await request.json();
+    const { title, body, url, userId, data } = await request.json();
 
     // Validate required fields
     if (!title || !body) {
@@ -39,27 +39,23 @@ export async function POST(request) {
       );
     }
 
-    // Check if VAPID keys are configured
-    if (!vapidPublicKey || !vapidPrivateKey) {
-      console.error('VAPID keys not configured');
+    if (!userId) {
       return NextResponse.json(
-        { error: 'Push notifications not configured' },
-        { status: 500 }
+        { error: 'User ID is required' },
+        { status: 400 }
       );
     }
 
-    // TODO: Get user subscriptions from your database
-    // Example:
-    /*
+    // Get user subscriptions from database
+    const connectToDatabase = (await import('@/app/lib/db')).default;
+    const db = await connectToDatabase();
+    
     const subscriptions = await db.collection('pushSubscriptions').find({
-      userId: userId || { $exists: true }
+      userId: userId
     }).toArray();
-    */
-
-    // For demonstration, we'll use an empty array
-    const subscriptions = [];
 
     if (subscriptions.length === 0) {
+      console.log('No subscriptions found for user:', userId);
       return NextResponse.json(
         { 
           success: false,
@@ -68,6 +64,8 @@ export async function POST(request) {
         { status: 200 }
       );
     }
+
+    console.log(`Found ${subscriptions.length} subscription(s) for user:`, userId);
 
     // Prepare notification payload
     const payload = JSON.stringify({
@@ -78,27 +76,51 @@ export async function POST(request) {
       url: url || '/',
       tag: 'qreturn-notification',
       timestamp: Date.now(),
+      data: data || {},
     });
 
     // Send notifications to all subscriptions
-    const sendPromises = subscriptions.map(async (subscription) => {
+    const sendPromises = subscriptions.map(async (sub) => {
       try {
-        await webpush.sendNotification(subscription, payload);
-        return { success: true, endpoint: subscription.endpoint };
+        // Handle FCM tokens (for Firebase Cloud Messaging)
+        if (sub.fcmToken) {
+          // FCM tokens are handled by Firebase on the client side
+          // or you can use Firebase Admin SDK here
+          console.log('FCM token found, notification will be handled by Firebase');
+          return { success: true, type: 'fcm', userId: sub.userId };
+        }
+        
+        // Handle web-push subscriptions (for browsers)
+        if (sub.endpoint && sub.keys) {
+          // Check if VAPID keys are configured
+          if (!vapidPublicKey || !vapidPrivateKey) {
+            console.error('VAPID keys not configured');
+            return { success: false, type: 'web-push', error: 'VAPID not configured' };
+          }
+
+          const subscription = {
+            endpoint: sub.endpoint,
+            keys: sub.keys,
+            expirationTime: sub.expirationTime
+          };
+
+          await webpush.sendNotification(subscription, payload);
+          return { success: true, type: 'web-push', endpoint: sub.endpoint };
+        }
+
+        return { success: false, error: 'No valid subscription method found' };
       } catch (error) {
         console.error('Error sending to subscription:', error);
         
         // If subscription is no longer valid, remove it from database
-        if (error.statusCode === 410) {
-          // TODO: Remove invalid subscription from database
-          /*
+        if (error.statusCode === 410 || error.statusCode === 404) {
+          console.log('Removing invalid subscription');
           await db.collection('pushSubscriptions').deleteOne({
-            endpoint: subscription.endpoint
+            _id: sub._id
           });
-          */
         }
         
-        return { success: false, endpoint: subscription.endpoint, error: error.message };
+        return { success: false, endpoint: sub.endpoint, error: error.message };
       }
     });
 

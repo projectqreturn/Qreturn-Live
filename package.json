@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "configure-firebase": "node scripts/configure-firebase-sw.js",
+    "generate-vapid": "npx web-push generate-vapid-keys"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.12.10",

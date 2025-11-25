@@ -46,6 +46,7 @@ export const NOTIFICATION_TYPES = {
  * @param {Object} [notificationData.data] - Additional data (itemId, postId, etc.)
  * @param {string} [notificationData.link] - Link to navigate when clicked
  * @param {string} [notificationData.priority] - Priority level (high, medium, low)
+ * @param {boolean} [notificationData.sendPush] - Whether to send push notification (default: true)
  * @returns {Promise<string>} - The created notification ID
  */
 export const createNotification = async ({
@@ -55,7 +56,8 @@ export const createNotification = async ({
   message,
   data = {},
   link = null,
-  priority = 'medium'
+  priority = 'medium',
+  sendPush = true
 }) => {
   try {
     if (!userId || !type || !title || !message) {
@@ -75,9 +77,68 @@ export const createNotification = async ({
       updatedAt: Timestamp.now(),
     });
 
+    // Send push notification if enabled
+    if (sendPush) {
+      try {
+        await sendPushNotification({
+          userId,
+          title,
+          body: message,
+          url: link || '/',
+          data: {
+            notificationId: notificationRef.id,
+            type,
+            ...data
+          }
+        });
+      } catch (pushError) {
+        // Don't fail the notification creation if push fails
+        console.error('Failed to send push notification:', pushError);
+      }
+    }
+
     return notificationRef.id;
   } catch (error) {
     console.error('Error creating notification:', error);
+    throw error;
+  }
+};
+
+/**
+ * Send push notification to user's devices
+ * @param {Object} pushData - Push notification data
+ * @param {string} pushData.userId - User ID to send to
+ * @param {string} pushData.title - Notification title
+ * @param {string} pushData.body - Notification body
+ * @param {string} [pushData.url] - URL to open when clicked
+ * @param {Object} [pushData.data] - Additional data
+ * @returns {Promise<void>}
+ */
+export const sendPushNotification = async ({ userId, title, body, url, data = {} }) => {
+  try {
+    const response = await fetch('/api/push/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        title,
+        body,
+        url,
+        data
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to send push notification');
+    }
+
+    const result = await response.json();
+    console.log('Push notification sent:', result);
+  } catch (error) {
+    console.error('Error sending push notification:', error);
     throw error;
   }
 };
@@ -506,5 +567,6 @@ export default {
   notifyItemMatch,
   notifyQRScan,
   notifyNewMessage,
+  sendPushNotification,
   NOTIFICATION_TYPES,
 };
