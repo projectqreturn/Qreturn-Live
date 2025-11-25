@@ -6,7 +6,7 @@ importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-comp
 
 // Initialize Firebase in the service worker
 const firebaseConfig = {
-  apiKey: "AIzaSyB4N46Pq7fBBhCOptQgPnlR7VN4lCJAelw-QF9_epjOMq4Z_alGRqdGkzPg",
+  apiKey: "AIzaSyB4N46Pq7fBBhCOptQgPnlR7VN4lCJAelw",
   authDomain: "qreturn-chat.firebaseapp.com",
   projectId: "qreturn-chat",
   storageBucket: "qreturn-chat.firebasestorage.app",
