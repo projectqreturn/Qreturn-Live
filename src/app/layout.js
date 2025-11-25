@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
+import PWARegistration from "@/components/pwa/PWARegistration";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,7 +51,8 @@ export default function RootLayout({ children }) {
         <head>
           <link rel="manifest" href="/manifest.json" />
           <meta name="theme-color" content="#000000" />
-          <link rel="apple-touch-icon" href="/icons/192.png" />
+          <link rel="icon" type="image/png" href="/icons/192.png" />
+          <link rel="apple-touch-icon" href="/icons/180.png" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="default" />
           <meta name="apple-mobile-web-app-title" content="Qreturn" />
@@ -60,6 +62,7 @@ export default function RootLayout({ children }) {
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
+          <PWARegistration />
           {children}
         </body>
       </html>

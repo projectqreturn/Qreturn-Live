@@ -9,10 +9,10 @@
   "orientation": "portrait-primary",
   "icons": [
     { "src": "/icons/100.png", "sizes": "100x100", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/120.png", "sizes": "120x120", "type": "image/png", "purpose": "any maskable" },
     { "src": "/icons/128.png", "sizes": "128x128", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icons/144.png", "sizes": "144x144", "type": "image/png", "purpose": "any maskable" },
     { "src": "/icons/152.png", "sizes": "152x152", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icons/167.png", "sizes": "167x167", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/180.png", "sizes": "180x180", "type": "image/png", "purpose": "any maskable" },
     { "src": "/icons/192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
     { "src": "/icons/256.png", "sizes": "256x256", "type": "image/png", "purpose": "any maskable" },
     { "src": "/icons/512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
@@ -36,14 +36,14 @@
       "short_name": "Report",
       "description": "Report a lost item",
       "url": "/createpost?type=lost",
-      "icons": [{ "src": "/icons/100.png", "sizes": "100x100" }]
+      "icons": [{ "src": "/icons/100.png", "sizes": "100x100", "type": "image/png" }]
     },
     {
       "name": "Report Found Item",
       "short_name": "Found",
       "description": "Report a found item",
       "url": "/createpost?type=found",
-      "icons": [{ "src": "/icons/100.png", "sizes": "100x100" }]
+      "icons": [{ "src": "/icons/100.png", "sizes": "100x100", "type": "image/png" }]
     }
   ]
 }

@@ -1,4 +1,82 @@
-// Custom service worker for push notifications
+// Custom service worker for Qreturn PWA
+const CACHE_NAME = 'qreturn-cache-v1';
+const RUNTIME_CACHE = 'qreturn-runtime-cache';
+
+// Install event - cache essential resources
+self.addEventListener('install', (event) => {
+  console.log('[Service Worker] Installing...');
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log('[Service Worker] Caching essential resources');
+      return cache.addAll([
+        '/',
+        '/manifest.json',
+        '/icons/192.png',
+        '/icons/512.png',
+      ]);
+    }).then(() => {
+      console.log('[Service Worker] Skip waiting');
+      return self.skipWaiting();
+    })
+  );
+});
+
+// Activate event - clean up old caches
+self.addEventListener('activate', (event) => {
+  console.log('[Service Worker] Activating...');
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME && cacheName !== RUNTIME_CACHE) {
+            console.log('[Service Worker] Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => {
+      console.log('[Service Worker] Claiming clients');
+      return self.clients.claim();
+    })
+  );
+});
+
+// Fetch event - network first with cache fallback
+self.addEventListener('fetch', (event) => {
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') return;
+
+  event.respondWith(
+    caches.open(RUNTIME_CACHE).then((cache) => {
+      return fetch(event.request)
+        .then((response) => {
+          // Cache successful responses
+          if (response.status === 200) {
+            cache.put(event.request, response.clone());
+          }
+          return response;
+        })
+        .catch(() => {
+          // Network failed, try cache
+          return cache.match(event.request).then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            // If not in cache, return offline page or error
+            return new Response('Offline - resource not available', {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: new Headers({
+                'Content-Type': 'text/plain',
+              }),
+            });
+          });
+        });
+    })
+  );
+});
+
+// Push notification handler
 self.addEventListener('push', function(event) {
   console.log('[Service Worker] Push Received.');
   console.log(`[Service Worker] Push had this data: "${event.data?.text()}"`);
