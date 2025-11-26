@@ -2,6 +2,8 @@
 import { usePathname } from "next/navigation";
 import PostNavBar from "@/components/postnav/PostNavBar";
 
+
+
 export default function MainAppLayout({ children }) {
   const pathname = usePathname();
 
@@ -16,6 +18,7 @@ export default function MainAppLayout({ children }) {
         </div>
       )}
       {children}
+      
     </div>
   );
 }

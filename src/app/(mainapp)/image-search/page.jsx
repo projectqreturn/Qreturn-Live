@@ -122,7 +122,7 @@ export default function SearchPage() {
     <main className="min-h-screen bg-black text-white flex flex-col items-center mb-5">
       <Toaster position="top-center" reverseOrder={false} />
       
-      <section className="text-center max-w-2xl mb-4 mt-20">
+      <section className="text-center max-w-2xl mb-4 sm:mt-48 mt-32">
         <h2 className="text-xl font-semibold mb-2">AI image searcher</h2>
         <p className="text-white text-sm">
           AI Image Searcher helps you quickly match lost and found items by

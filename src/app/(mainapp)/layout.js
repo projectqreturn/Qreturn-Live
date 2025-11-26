@@ -2,6 +2,7 @@ import Appnav from "../../components/appnav/Appnav";
 import Footer from "@/components/footer/Footer";
 import LocationTracker from "@/components/LocationTracker";
 import InstallPWA from "@/components/pwa/InstallPWA";
+import { Analytics } from '@vercel/analytics/next';
 
 export default function MainAppLayout({ children }) {
   return (
@@ -23,6 +24,7 @@ export default function MainAppLayout({ children }) {
       
       <main className="flex-grow">
         {children}
+        <Analytics />
       </main>
 
       
