@@ -5,6 +5,7 @@ import { dark } from "@clerk/themes";
 import PWARegistration from "@/components/pwa/PWARegistration";
 import PushNotificationProvider from "@/app/lib/notification/PushNotificationProvider";
 import { Toaster } from "react-hot-toast";
+import { Analytics } from '@vercel/analytics/next';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -68,6 +69,7 @@ export default function RootLayout({ children }) {
           <PushNotificationProvider>
             <Toaster position="top-right" />
             {children}
+            <Analytics />
           </PushNotificationProvider>
         </body>
       </html>
