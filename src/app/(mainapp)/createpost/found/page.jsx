@@ -170,10 +170,6 @@ export default function FoundItemForm() {
 
   return (
     <div className="bg-gray-950 text-white min-h-screen sm:p-48 p-10 mt-48 sm:mt-10">
-      <Toaster
-        position="top-center"
-        reverseOrder={false}
-      />
       <h1 className="text-2xl font-bold mb-8">Found an item? Post it here.</h1>
 
       <div className="flex flex-col md:flex-row gap-8">
