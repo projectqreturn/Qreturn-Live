@@ -87,7 +87,7 @@ const Gmap = ({ locations, userLocation, postType }) => {
         <GoogleMap
           mapContainerStyle={containerStyle}
           center={defaultCenter}
-          zoom={15}
+          zoom={13}
           onLoad={onMapLoad}
         >
           {/* Add user location marker */}
