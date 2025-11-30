@@ -87,6 +87,7 @@ const Page = () => {
               rewardAmount:
                 p.reward && p.price ? `Rs. ${p.price}` : undefined,
               gps: { lat, lng },
+              category: p.category || "other",
             };
           })
           .filter(Boolean); // remove nulls
@@ -116,8 +117,13 @@ const Page = () => {
           lng: post.gps.lng,
           name: post.title,
           url: `/${nearbyType}/${post.id}`,
+          imageUrl: post.imageUrl,
+          hasReward: post.hasReward,
+          rewardAmount: post.rewardAmount,
+          category: post.category,
         }))}
         userLocation={userLocation}
+        postType={nearbyType}
       />
     </div>
   );
