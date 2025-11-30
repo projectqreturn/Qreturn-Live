@@ -452,15 +452,15 @@ export async function GET(req) {
       );
     }
 
-    // If GPS is provided, filter posts within 5km radius
+    // If GPS is provided, filter posts within 10km radius
     if (userGps) {
       const allPosts = await LostPost.find(filter).sort({ createdAt: -1 });
       
-      // Filter posts within 5km radius
+      // Filter posts within 10km radius
       const nearbyPosts = allPosts.filter(post => {
         if (!post.gps) return false;
         const distance = getDistance(userGps, post.gps);
-        return isFinite(distance) && distance <= 5;
+        return isFinite(distance) && distance <= 10;
       });
 
       // Sort posts by distance
