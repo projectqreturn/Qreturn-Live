@@ -29,6 +29,43 @@ const ReportsContent = () => {
     fetchReports();
   }, [filter, sortBy, userEmail, showMyPosts]);
 
+  const groupReportsByPost = (reportsList) => {
+    const grouped = {};
+    
+    reportsList.forEach(report => {
+      if (!grouped[report.postId]) {
+        // First report for this post
+        grouped[report.postId] = {
+          ...report,
+          reasons: [report.reason],
+          descriptions: [report.description],
+          reportIds: [report._id],
+          allUpvotes: report.upvotes || [],
+          totalVotes: report.voteCount || 0,
+        };
+      } else {
+        // Add reason if not already present
+        if (!grouped[report.postId].reasons.includes(report.reason)) {
+          grouped[report.postId].reasons.push(report.reason);
+        }
+        // Add description if different
+        if (!grouped[report.postId].descriptions.includes(report.description)) {
+          grouped[report.postId].descriptions.push(report.description);
+        }
+        // Merge report IDs
+        grouped[report.postId].reportIds.push(report._id);
+        // Merge upvotes
+        grouped[report.postId].allUpvotes = [
+          ...new Set([...grouped[report.postId].allUpvotes, ...(report.upvotes || [])])
+        ];
+        // Sum votes
+        grouped[report.postId].totalVotes += report.voteCount || 0;
+      }
+    });
+    
+    return Object.values(grouped);
+  };
+
   const fetchReports = async () => {
     setLoading(true);
     try {
@@ -45,7 +82,9 @@ const ReportsContent = () => {
       const data = await res.json();
 
       if (res.ok) {
-        setReports(data.reports || []);
+        // Group reports by postId
+        const groupedReports = groupReportsByPost(data.reports || []);
+        setReports(groupedReports);
       } else {
         toast.error("Failed to fetch reports");
       }
@@ -78,21 +117,9 @@ const ReportsContent = () => {
       const data = await res.json();
 
       if (res.ok) {
-        // Update the report in state
-        setReports((prevReports) =>
-          prevReports.map((report) =>
-            report._id === reportId
-              ? {
-                  ...report,
-                  voteCount: data.voteCount,
-                  upvotes: data.hasUpvoted
-                    ? [...report.upvotes, user.id]
-                    : report.upvotes.filter((id) => id !== user.id),
-                }
-              : report
-          )
-        );
         toast.success(data.message);
+        // Refetch to update grouped data
+        fetchReports();
       } else {
         toast.error(data.message || "Failed to vote");
       }
@@ -103,7 +130,7 @@ const ReportsContent = () => {
   };
 
   const hasUserUpvoted = (report) => {
-    return user && report.upvotes && report.upvotes.includes(user.id);
+    return user && report.allUpvotes && report.allUpvotes.includes(user.id);
   };
 
   const toggleExpand = (reportId) => {
@@ -208,7 +235,7 @@ const ReportsContent = () => {
                   {/* Vote Section */}
                   <div className="flex flex-col items-center gap-1">
                     <button
-                      onClick={() => handleUpvote(report._id)}
+                      onClick={() => handleUpvote(report.reportIds ? report.reportIds[0] : report._id)}
                       className={`p-2 rounded-lg transition-colors ${
                         hasUserUpvoted(report)
                           ? "bg-blue-600 text-white"
@@ -222,7 +249,7 @@ const ReportsContent = () => {
                         <MdThumbUpOffAlt size={20} />
                       )}
                     </button>
-                    <span className="text-lg font-bold">{report.voteCount}</span>
+                    <span className="text-lg font-bold">{report.totalVotes || report.voteCount}</span>
                     <span className="text-xs text-gray-500">votes</span>
                   </div>
 
@@ -247,39 +274,76 @@ const ReportsContent = () => {
                           <span className="text-xs text-gray-500">
                             Post ID: {report.postId}
                           </span>
+                          {report.reportIds && report.reportIds.length > 1 && (
+                            <span className="text-xs text-rose-400">
+                              ({report.reportIds.length} reports)
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <span
-                        className={`text-xs px-3 py-1 rounded-full border ${getReasonColor(
-                          report.reason
-                        )}`}
-                      >
-                        {report.reason}
-                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {report.reasons ? (
+                          report.reasons.map((reason, idx) => (
+                            <span
+                              key={idx}
+                              className={`text-xs px-3 py-1 rounded-full border ${getReasonColor(reason)}`}
+                            >
+                              {reason}
+                            </span>
+                          ))
+                        ) : (
+                          <span
+                            className={`text-xs px-3 py-1 rounded-full border ${getReasonColor(report.reason)}`}
+                          >
+                            {report.reason}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Description Preview */}
-                    <p className="text-gray-300 mb-3">
-                      {expandedReportId === report._id
-                        ? report.description
-                        : `${report.description.substring(0, 150)}${
-                            report.description.length > 150 ? "..." : ""
-                          }`}
-                    </p>
-
-                    {report.description.length > 150 && (
-                      <button
-                        onClick={() => toggleExpand(report._id)}
-                        className="text-blue-400 hover:text-blue-300 text-sm mb-3"
-                      >
-                        {expandedReportId === report._id ? "Show less" : "Show more"}
-                      </button>
+                    {report.descriptions ? (
+                      <div className="mb-3">
+                        {report.descriptions.map((desc, idx) => (
+                          <div key={idx} className="mb-2">
+                            <p className="text-gray-300">
+                              {expandedReportId === report._id
+                                ? desc
+                                : `${desc.substring(0, 150)}${desc.length > 150 ? "..." : ""}`}
+                            </p>
+                          </div>
+                        ))}
+                        {report.descriptions.some(d => d.length > 150) && (
+                          <button
+                            onClick={() => toggleExpand(report._id)}
+                            className="text-blue-400 hover:text-blue-300 text-sm"
+                          >
+                            {expandedReportId === report._id ? "Show less" : "Show more"}
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-gray-300 mb-3">
+                          {expandedReportId === report._id
+                            ? report.description
+                            : `${report.description.substring(0, 150)}${
+                                report.description.length > 150 ? "..." : ""
+                              }`}
+                        </p>
+                        {report.description.length > 150 && (
+                          <button
+                            onClick={() => toggleExpand(report._id)}
+                            className="text-blue-400 hover:text-blue-300 text-sm mb-3"
+                          >
+                            {expandedReportId === report._id ? "Show less" : "Show more"}
+                          </button>
+                        )}
+                      </>
                     )}
 
                     {/* Meta Info */}
                     <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
-                      <span>Reported by: {report.reporterEmail}</span>
-                      <span>•</span>
                       <span>
                         {new Date(report.createdAt).toLocaleDateString("en-US", {
                           year: "numeric",
