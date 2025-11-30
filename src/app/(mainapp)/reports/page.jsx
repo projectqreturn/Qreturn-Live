@@ -182,6 +182,19 @@ const ReportsContent = () => {
           )}
         </div>
 
+        {/* Notice about auto-disable */}
+        <div className="mb-6 p-4 bg-blue-900/20 border border-blue-500 rounded-lg">
+          <div className="flex items-start gap-3">
+            <span className="text-xl">ℹ️</span>
+            <div>
+              <h3 className="font-semibold text-blue-400 text-sm mb-1">Auto-Disable Notice</h3>
+              <p className="text-gray-300 text-xs">
+                Posts that receive 10 or more report votes will be automatically disabled. Vote on reports to help maintain community standards.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Filters and Sort */}
         <div className="flex flex-wrap gap-4 mb-6 items-center">
           {/* Status Filter */}
