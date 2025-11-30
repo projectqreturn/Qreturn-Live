@@ -5,6 +5,7 @@ import { HiMenu } from "react-icons/hi";
 import { FaBell } from "react-icons/fa";
 import { BsChatDotsFill } from "react-icons/bs";
 import { AiFillPlusCircle } from "react-icons/ai";
+import { MdOutlineReport } from "react-icons/md";
 import Link from "next/link";
 import { SignOutButton, useUser } from "@clerk/nextjs";
 import { MdOutlineImageSearch } from "react-icons/md";
@@ -36,6 +37,7 @@ const NavLinks = () => {
     { href: "/notifications", icon: FaBell, label: "Notifications", showBadge: true, badgeCount: unreadCount || 0 },
     { href: "/chats", icon: BsChatDotsFill, label: "Messages", showBadge: true, badgeCount: messageCount || 0 },
     { href: "/myitems", icon: FaTag, label: "My Items" },
+    { href: "/reports", icon: MdOutlineReport, label: "Reports" },
     { href: "/profile", icon: FaUserCircle, label: "Profile" },
     { href: "/image-search", icon: MdOutlineImageSearch, label: "Image Search" },
     { href: "#", icon: FaSignOutAlt, label: "Sign Out", isSignOut: true },

@@ -214,6 +214,24 @@ export default function PostsApp() {
               )}
             </div>
           </div>
+
+          {/* Reported Posts Section */}
+          <div className="mt-8">
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+              <h2 className="text-lg font-bold text-white mb-2 flex items-center">
+                <span className="mr-2">🚨</span> Reported Posts
+              </h2>
+              <p className="text-gray-400 text-sm mb-4">
+                View reports submitted by the community about your posts. Stay informed about any concerns raised.
+              </p>
+              <a
+                href="/reports?myPosts=true"
+                className="inline-flex items-center px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors font-medium text-sm"
+              >
+                View Reports on My Posts
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 
