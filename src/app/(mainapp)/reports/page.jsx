@@ -1,12 +1,12 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { MdThumbUp, MdThumbUpOffAlt } from "react-icons/md";
 import { FaFilter, FaSort } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { useSearchParams } from "next/navigation";
 
-const ReportsPage = () => {
+const ReportsContent = () => {
   const { isSignedIn, user, isLoaded } = useUser();
   const searchParams = useSearchParams();
   const showMyPosts = searchParams.get("myPosts") === "true";
@@ -322,6 +322,20 @@ const ReportsPage = () => {
         )}
       </div>
     </div>
+  );
+};
+
+const ReportsPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-900 pt-24 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center text-gray-400">Loading reports...</div>
+        </div>
+      </div>
+    }>
+      <ReportsContent />
+    </Suspense>
   );
 };
 
