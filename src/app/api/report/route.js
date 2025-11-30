@@ -162,6 +162,39 @@ export async function PUT(req) {
       report.voteCount = report.upvotes.length;
       await report.save();
 
+      // Check if vote count exceeded threshold (10 votes)
+      if (report.voteCount > 10) {
+        console.log(`Report ${reportId} exceeded 10 votes. Attempting to disable post ${report.postId}`);
+        
+        // Disable the post based on post type
+        try {
+          const postApiUrl = report.postType === 'lost' 
+            ? `/api/post/lost?id=${report.postId}` 
+            : `/api/post/found?id=${report.postId}`;
+          
+          // Import the models
+          const LostPost = (await import("../../lib/modals/lostPost.modal")).default;
+          const FoundPost = (await import("../../lib/modals/foundPost.modal")).default;
+          
+          if (report.postType === 'lost') {
+            await LostPost.findOneAndUpdate(
+              { lostPostId: report.postId },
+              { isDisabled: true, disabledReason: 'Community reports exceeded threshold', disabledAt: new Date() }
+            );
+            console.log(`Lost post ${report.postId} has been disabled`);
+          } else {
+            await FoundPost.findOneAndUpdate(
+              { foundPostId: report.postId },
+              { isDisabled: true, disabledReason: 'Community reports exceeded threshold', disabledAt: new Date() }
+            );
+            console.log(`Found post ${report.postId} has been disabled`);
+          }
+        } catch (disableError) {
+          console.error("Error disabling post:", disableError);
+          // Don't fail the vote if post disabling fails
+        }
+      }
+
       return NextResponse.json(
         { message: "Upvoted successfully", voteCount: report.voteCount, hasUpvoted: true },
         { status: 200 }

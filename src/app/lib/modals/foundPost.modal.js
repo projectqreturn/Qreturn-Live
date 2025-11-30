@@ -57,6 +57,18 @@ const FoundPostSchema = new Schema({
     required: false,
     default: "",
   },
+  isDisabled: {
+    type: Boolean,
+    default: false,
+  },
+  disabledReason: {
+    type: String,
+    default: null,
+  },
+  disabledAt: {
+    type: Date,
+    default: null,
+  },
 }, { timestamps: true });
 
 FoundPostSchema.plugin(AutoIncrement, { inc_field: "foundPostId" });

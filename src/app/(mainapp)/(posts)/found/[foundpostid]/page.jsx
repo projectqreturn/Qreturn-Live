@@ -6,8 +6,6 @@ import { MdOutlineReport, MdVerified } from "react-icons/md";
 import { IoChatboxEllipses } from "react-icons/io5";
 import { useParams } from "next/navigation";
 import ReportModal from "@/components/modals/ReportModal";
-import ReportModal from "@/components/modals/ReportModal";
-
 import { useUser } from "@clerk/clerk-react";
 import { db } from "@/firebase/firebase.config";
 import {
@@ -217,6 +215,31 @@ const navigateToChat = async () => {
           postOwnerEmail={post.email}
         />
       )}
+      
+      {/* Disabled Post Warning */}
+      {post.isDisabled && (
+        <div className="mb-6 p-4 bg-rose-900/20 border border-rose-500 rounded-lg">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <svg className="w-5 h-5 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h4 className="text-rose-500 font-semibold text-sm mb-1">Post Disabled</h4>
+              <p className="text-gray-300 text-sm">
+                {post.disabledReason || 'This post has been disabled due to community reports.'}
+              </p>
+              {post.disabledAt && (
+                <p className="text-gray-400 text-xs mt-2">
+                  Disabled on {new Date(post.disabledAt).toLocaleDateString()}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <h3 className="text-center font-semibold">Found: {post.title}</h3>
       <center>
         <div className="flex items-stretch justify-center gap-7 mt-1">

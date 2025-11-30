@@ -408,6 +408,9 @@ export async function GET(req) {
     // Build filter object for search and category
     let filter = {};
     
+    // Filter out disabled posts (unless requesting by ID which is handled above)
+    filter.isDisabled = { $ne: true };
+    
     // Add search query filter
     if (searchQuery) {
       filter.$or = [
@@ -419,6 +422,8 @@ export async function GET(req) {
     // Add email filter
     if (email) {
       filter.email = email;
+      // Show disabled posts to owner
+      delete filter.isDisabled;
     }
 
     // Add category filter

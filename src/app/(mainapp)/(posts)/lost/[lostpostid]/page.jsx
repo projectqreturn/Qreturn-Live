@@ -224,6 +224,27 @@ const navigateToChat = async () => {
           postOwnerEmail={post.email}
         />
       )}
+      
+      {/* Disabled Post Warning */}
+      {post.isDisabled && (
+        <div className="max-w-4xl mx-auto mb-6 p-4 bg-red-900/30 border-2 border-red-600 rounded-lg">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">⛔</span>
+            <div>
+              <h3 className="font-bold text-red-400 text-lg mb-1">This Post Has Been Disabled</h3>
+              <p className="text-gray-300 text-sm">
+                {post.disabledReason || 'This post has been disabled due to community reports.'}
+              </p>
+              {post.email === userEmail && (
+                <p className="text-gray-400 text-xs mt-2">
+                  You can still view this post as the owner. Contact support if you believe this was a mistake.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      
       <h3 className="text-center font-semibold">Lost: {post.title}</h3>
       <center>
         <div className="flex items-stretch justify-center gap-7 mt-1">
