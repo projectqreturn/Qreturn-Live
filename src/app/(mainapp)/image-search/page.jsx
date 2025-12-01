@@ -5,6 +5,7 @@ import FileUploadArea from "../../../components/fileupload/FileUpload";
 import PostCard from "../../../components/postcard/PostCard";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { PiWarningCircleBold } from "react-icons/pi";
 
 export default function SearchPage() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function SearchPage() {
 
   // Save search state whenever results change
   useEffect(() => {
-    if (results.length > 0.0000000) {
+    if (results.length > 0.0) {
       const state = {
         results,
         postType,
@@ -56,7 +57,7 @@ export default function SearchPage() {
     }
 
     setIsSearching(true);
-    
+
     try {
       // Prepare form data
       const formData = new FormData();
@@ -92,7 +93,6 @@ export default function SearchPage() {
         setResults([]);
         toast.error("No matching posts found. Try a different image.");
       }
-
     } catch (error) {
       console.error("Search error:", error);
       toast.error(error.message || "Failed to search. Please try again.");
@@ -119,16 +119,30 @@ export default function SearchPage() {
   };
 
   return (
-    <main className="min-h-screen bg-black text-white flex flex-col items-center mb-5">
+    <main className="min-h-screen  text-white flex flex-col items-center mb-5">
       <Toaster position="top-center" reverseOrder={false} />
-      
-      <section className="text-center max-w-2xl mb-4 sm:mt-48 mt-32">
-        <h2 className="text-xl font-semibold mb-2">AI image searcher</h2>
-        <p className="text-white text-sm">
-          AI Image Searcher helps you quickly match lost and found items by
-          scanning and comparing photos. It makes it easier to reconnect people
-          with their belongings in just a few clicks.
-        </p>
+
+      <section className="text-center max-w-2xl mb-4 mt-32 z-100 p-2">
+        <div className="gap-2 inline-flex items-center justify-center">
+          <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
+            <span>Image Search</span>
+            <span className="inline-flex items-center justify-center bg-yellow-400 text-black text-sm font-sans px-2 py-0.5 rounded-full ring-1 ring-amber-600 shadow-sm leading-none">
+              Beta
+            </span>
+          </h2>
+        </div>
+        <div className="bg-zinc-900/40 border border-zinc-800 rounded-md p-3 text-white/70 text-sm not-italic flex items-start">
+          <PiWarningCircleBold
+            className="text-yellow-700 w-6 h-6 flex-shrink-0 mr-3 mt-1"
+            aria-hidden="true"
+          />
+          <p className="m-0 text-white/60 text-sm">
+            AI Image Searcher is a beta feature designed to assist in matching
+            lost and found items through automated photo scanning and
+            comparison. As this feature is experimental, search results may be
+            incomplete or inaccurate. please verify any matches manually.
+          </p>
+        </div>
       </section>
 
       {/* Upload Section */}
@@ -207,15 +221,19 @@ export default function SearchPage() {
                 className="w-[300px] h-auto rounded-lg shadow-lg border border-zinc-800"
               />
             </div>
-            
+
             {/* Search Info */}
             <div className="flex-1">
               <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 mb-4">
-                <h3 className="text-sm font-semibold mb-2 text-[#00FF91]">Search Results</h3>
+                <h3 className="text-sm font-semibold mb-2 text-[#00FF91]">
+                  Search Results
+                </h3>
                 <div className="space-y-1 text-sm">
                   <p>
                     <span className="text-gray-400">Search Type:</span>{" "}
-                    <span className="font-medium capitalize">{postType} Posts</span>
+                    <span className="font-medium capitalize">
+                      {postType} Posts
+                    </span>
                   </p>
                   <p>
                     <span className="text-gray-400">Matches Found:</span>{" "}
@@ -228,14 +246,16 @@ export default function SearchPage() {
                         <span className="font-medium">{searchInfo.count}</span>
                       </p>
                       <p>
-                        <span className="text-gray-400">Total in Database:</span>{" "}
+                        <span className="text-gray-400">
+                          Total in Database:
+                        </span>{" "}
                         <span className="font-medium">{searchInfo.total}</span>
                       </p>
                     </>
                   )}
                 </div>
               </div>
-              
+
               <button
                 onClick={handleNewSearch}
                 className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-md text-sm transition"
@@ -247,13 +267,18 @@ export default function SearchPage() {
 
           {/* Results Grid */}
           <h2 className="text-lg font-semibold mb-4">
-            Matching {postType === "lost" ? "Lost" : "Found"} Posts ({results.length})
+            Matching {postType === "lost" ? "Lost" : "Found"} Posts (
+            {results.length})
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
             {results.map((post) => {
-              const postId = postType === "lost" ? post.lostPostId : post.foundPostId;
-              const imageUrl = Array.isArray(post.photo) && post.photo.length ? post.photo[0] : "/placeholder.jpg";
-              
+              const postId =
+                postType === "lost" ? post.lostPostId : post.foundPostId;
+              const imageUrl =
+                Array.isArray(post.photo) && post.photo.length
+                  ? post.photo[0]
+                  : "/placeholder.jpg";
+
               return (
                 <div key={postId} onClick={() => handleCardClick(post)}>
                   <PostCard
@@ -262,8 +287,14 @@ export default function SearchPage() {
                     title={post.title}
                     category={post.Category}
                     isVerified={Boolean(post.is_verified)}
-                    hasReward={postType === "lost" ? Boolean(post.reward) : false}
-                    rewardAmount={postType === "lost" && post.reward && post.price ? `Rs. ${post.price}` : undefined}
+                    hasReward={
+                      postType === "lost" ? Boolean(post.reward) : false
+                    }
+                    rewardAmount={
+                      postType === "lost" && post.reward && post.price
+                        ? `Rs. ${post.price}`
+                        : undefined
+                    }
                     location={post.District}
                     date={post.date}
                   />

@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/minimatch": "^6.0.0",
     "@types/node": "22.14.1",
     "@types/react": "19.1.2",
     "eslint": "^9",

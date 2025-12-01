@@ -122,7 +122,9 @@ function FileUploadArea({ files, setFiles }) {
   const removeFile = useCallback(() => setFiles([]), [setFiles]);
 
   return (
-    <div className="w-full max-w-md mx-auto mt-5"> {/* smaller width */}
+    <div className="w-full max-w-md mx-auto mt-5 p-2">
+      {" "}
+      {/* smaller width */}
       {files.length === 0 ? (
         <div
           className={`border-2 border-zinc-500/30 rounded-lg p-6 text-center transition-all duration-300 ${
