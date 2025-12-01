@@ -50,37 +50,38 @@ export async function POST(req) {
 
     // Handle main image upload if photos exist
     let searchId = null;
-    if (photo && photo.length > 0) {
-      const mainImageUrl = photo[0]; // First image is the main image
-      console.log("Uploading main image to external API:", mainImageUrl);
-      
-      try {
-        // Upload main image and get UUID-based search ID
-        const uploadResult = await uploadMainImageToExternalApi(mainImageUrl, 'lost');
-        console.log("Upload result received:", uploadResult);
-        
-        if (uploadResult && uploadResult.searchId) {
-          searchId = uploadResult.searchId;
-          console.log("Image uploaded successfully with search ID:", searchId);
-        } else {
-          console.error("Upload result missing searchId:", uploadResult);
-          throw new Error("Image upload did not return a valid search ID");
-        }
-      } catch (uploadError) {
-        console.error("Error uploading image to external API:", uploadError);
-        console.error("Error details:", uploadError.message);
-        // Fail the post creation if image upload fails when photos are provided
-        return NextResponse.json(
-          { 
-            message: "Failed to upload image to search service", 
-            error: uploadError.message 
-          },
-          { status: 500 }
-        );
-      }
-    } else {
-      console.log('No photos provided, skipping image upload');
-    }
+    // COMMENTED OUT - Image upload to external API causing errors
+    // if (photo && photo.length > 0) {
+    //   const mainImageUrl = photo[0]; // First image is the main image
+    //   console.log("Uploading main image to external API:", mainImageUrl);
+    //   
+    //   try {
+    //     // Upload main image and get UUID-based search ID
+    //     const uploadResult = await uploadMainImageToExternalApi(mainImageUrl, 'lost');
+    //     console.log("Upload result received:", uploadResult);
+    //     
+    //     if (uploadResult && uploadResult.searchId) {
+    //       searchId = uploadResult.searchId;
+    //       console.log("Image uploaded successfully with search ID:", searchId);
+    //     } else {
+    //       console.error("Upload result missing searchId:", uploadResult);
+    //       throw new Error("Image upload did not return a valid search ID");
+    //     }
+    //   } catch (uploadError) {
+    //     console.error("Error uploading image to external API:", uploadError);
+    //     console.error("Error details:", uploadError.message);
+    //     // Fail the post creation if image upload fails when photos are provided
+    //     return NextResponse.json(
+    //       { 
+    //         message: "Failed to upload image to search service", 
+    //         error: uploadError.message 
+    //       },
+    //       { status: 500 }
+    //     );
+    //   }
+    // } else {
+    //   console.log('No photos provided, skipping image upload');
+    // }
 
     // Add search_Id, user verification status, and clerkUserId to data
     const postData = { 
@@ -407,6 +408,9 @@ export async function GET(req) {
     // Build filter object for search and category
     let filter = {};
     
+    // Filter out disabled posts (unless requesting by ID which is handled above)
+    filter.isDisabled = { $ne: true };
+    
     // Add search query filter
     if (searchQuery) {
       filter.$or = [
@@ -418,6 +422,8 @@ export async function GET(req) {
     // Add email filter
     if (email) {
       filter.email = email;
+      // Show disabled posts to owner
+      delete filter.isDisabled;
     }
 
     // Add category filter
@@ -446,15 +452,15 @@ export async function GET(req) {
       );
     }
 
-    // If GPS is provided, filter posts within 5km radius
+    // If GPS is provided, filter posts within 10km radius
     if (userGps) {
       const allPosts = await LostPost.find(filter).sort({ createdAt: -1 });
       
-      // Filter posts within 5km radius
+      // Filter posts within 10km radius
       const nearbyPosts = allPosts.filter(post => {
         if (!post.gps) return false;
         const distance = getDistance(userGps, post.gps);
-        return isFinite(distance) && distance <= 5;
+        return isFinite(distance) && distance <= 10;
       });
 
       // Sort posts by distance

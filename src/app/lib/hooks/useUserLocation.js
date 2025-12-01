@@ -39,7 +39,7 @@ export const useUserLocation = () => {
     }
   };
 
-  // Get current location from browser
+  // Get current location from browser (one-time)
   const getCurrentLocation = () => {
     setLoading(true);
     setError(null);
@@ -102,6 +102,71 @@ export const useUserLocation = () => {
     );
   };
 
+  // Watch location continuously for automatic updates
+  const startWatchingLocation = () => {
+    if (!('geolocation' in navigator)) {
+      setError('Geolocation is not supported by your browser');
+      return null;
+    }
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const gpsString = `${latitude},${longitude}`;
+        
+        // Only update if location has changed significantly (more than ~10 meters)
+        if (location && location.gps) {
+          const [oldLat, oldLng] = location.gps.split(',').map(Number);
+          const distance = Math.sqrt(
+            Math.pow(latitude - oldLat, 2) + Math.pow(longitude - oldLng, 2)
+          ) * 111000; // Convert to meters (rough approximation)
+          
+          // Only update if moved more than 10 meters
+          if (distance < 10) return;
+        }
+        
+        console.log('Location updated:', gpsString);
+        setLocation({
+          lat: latitude,
+          lng: longitude,
+          gps: gpsString,
+        });
+
+        // Update in database
+        updateLocationInDB(gpsString);
+        setLoading(false);
+        setError(null);
+      },
+      (error) => {
+        console.error('Watch location error:', error);
+        let errorMessage = 'Unknown error';
+        if (error.code) {
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = 'Location access denied by user';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = 'Location information unavailable';
+              break;
+            case error.TIMEOUT:
+              errorMessage = 'Location request timed out';
+              break;
+            default:
+              errorMessage = error.message || 'Failed to get location';
+          }
+        }
+        setError(errorMessage);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 30000,
+        maximumAge: 0, // Don't use cached position for watch
+      }
+    );
+
+    return watchId;
+  };
+
   // Fetch location from database
   const fetchLocationFromDB = async () => {
     if (!user?.id) return;
@@ -128,7 +193,7 @@ export const useUserLocation = () => {
     }
   };
 
-  // Initialize location on mount
+  // Initialize location on mount and start watching
   useEffect(() => {
     if (user?.id) {
       // First, try to get from database
@@ -136,6 +201,17 @@ export const useUserLocation = () => {
       
       // Then update with current location
       getCurrentLocation();
+      
+      // Start watching location for continuous updates
+      const watchId = startWatchingLocation();
+      
+      // Cleanup: stop watching when component unmounts
+      return () => {
+        if (watchId !== null) {
+          navigator.geolocation.clearWatch(watchId);
+          console.log('Stopped watching location');
+        }
+      };
     }
   }, [user?.id]);
 

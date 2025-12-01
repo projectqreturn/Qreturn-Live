@@ -7,17 +7,11 @@ const Page = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [nearbyType, setNearbyType] = useState("lost"); // default
   const [loading, setLoading] = useState(true);
-  const [IdTyp, setIdType] = useState(null);
+  const [loadingPosts, setLoadingPosts] = useState(false);
 
   useEffect(() => {
     const type = localStorage.getItem("postType") || "lost";
     setNearbyType(type);
-    // if (type.includes("lost")) {
-    //   setIdType("lostPostId");
-    // }else{
-    //   setIdType("foundPostId");
-    // }
-    // console.log("ID Type:", IdTyp);
   }, []);
 
   const getCurrentLocation = () => {
@@ -32,11 +26,26 @@ const Page = () => {
         },
         (error) => {
           console.error("Error getting location:", error);
+          // Set a default location if geolocation fails (Sri Lanka center)
+          setUserLocation({
+            lat: 7.8731,
+            lng: 80.7718,
+          });
           setLoading(false);
+        },
+        {
+          enableHighAccuracy: false, // Faster, less accurate
+          timeout: 5000, // 5 second timeout
+          maximumAge: 60000, // Cache for 1 minute
         }
       );
     } else {
       console.error("Geolocation is not supported by your browser");
+      // Set default location
+      setUserLocation({
+        lat: 7.8731,
+        lng: 80.7718,
+      });
       setLoading(false);
     }
   };
@@ -49,6 +58,7 @@ const Page = () => {
     const fetchData = async () => {
       if (!userLocation) return;
 
+      setLoadingPosts(true);
       const endpoint = nearbyType.includes("lost")
         ? "/api/post/lost"
         : "/api/post/found";
@@ -58,7 +68,10 @@ const Page = () => {
 
         const res = await fetch(
           `${endpoint}?gps=${userLocation.lat},${userLocation.lng}`,
-          { cache: "no-store" }
+          { 
+            cache: "force-cache",
+            next: { revalidate: 60 } // Cache for 60 seconds
+          }
         );
 
         if (!res.ok) {
@@ -87,6 +100,7 @@ const Page = () => {
               rewardAmount:
                 p.reward && p.price ? `Rs. ${p.price}` : undefined,
               gps: { lat, lng },
+              category: p.category || "other",
             };
           })
           .filter(Boolean); // remove nulls
@@ -94,30 +108,45 @@ const Page = () => {
         setPosts(mapped);
       } catch (e) {
         console.error("Failed to load posts:", e);
+      } finally {
+        setLoadingPosts(false);
       }
     };
 
     fetchData();
   }, [userLocation, nearbyType]);
 
-  if (loading || !userLocation) {
+  if (loading) {
     return (
       <div className="pt-[23vh] lg:pt-44 px-4 text-center">
-        <p>Loading map...</p>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-400">Getting your location...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="pt-[23vh] lg:pt-44 px-4">
+      {loadingPosts && (
+        <div className="mb-3 text-center">
+          <span className="text-sm text-blue-400">Loading nearby items...</span>
+        </div>
+      )}
       <Gmap
         locations={posts.map((post) => ({
           lat: post.gps.lat,
           lng: post.gps.lng,
           name: post.title,
           url: `/${nearbyType}/${post.id}`,
+          imageUrl: post.imageUrl,
+          hasReward: post.hasReward,
+          rewardAmount: post.rewardAmount,
+          category: post.category,
         }))}
         userLocation={userLocation}
+        postType={nearbyType}
       />
     </div>
   );

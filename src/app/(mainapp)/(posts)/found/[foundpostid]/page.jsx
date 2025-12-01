@@ -5,7 +5,7 @@ import Gmap2 from "@/components/map/Gmap2";
 import { MdOutlineReport, MdVerified } from "react-icons/md";
 import { IoChatboxEllipses } from "react-icons/io5";
 import { useParams } from "next/navigation";
-
+import ReportModal from "@/components/modals/ReportModal";
 import { useUser } from "@clerk/clerk-react";
 import { db } from "@/firebase/firebase.config";
 import {
@@ -24,6 +24,7 @@ const FoundPostPage = () => {
   const { foundpostid } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [gps, setGps] = useState({
     lat: 7.487718248208046,
     lng: 80.36427172854248
@@ -189,8 +190,56 @@ const navigateToChat = async () => {
   }
 };
 
+  const handleReportClick = () => {
+    if (!isSignedIn || !userEmail) {
+      alert("Please sign in to report this post.");
+      return;
+    }
+    setIsReportModalOpen(true);
+  };
+
   return (
     <div className="pt-[23vh] lg:pt-44 px-4 mb-8">
+      {/* Report Modal */}
+      {post && (
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          postData={{
+            postId: post.foundPostId,
+            postType: 'found',
+            title: post.title,
+          }}
+          userEmail={userEmail}
+          userId={user?.id}
+          postOwnerEmail={post.email}
+        />
+      )}
+      
+      {/* Disabled Post Warning */}
+      {post.isDisabled && (
+        <div className="mb-6 p-4 bg-rose-900/20 border border-rose-500 rounded-lg">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <svg className="w-5 h-5 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h4 className="text-rose-500 font-semibold text-sm mb-1">Post Disabled</h4>
+              <p className="text-gray-300 text-sm">
+                {post.disabledReason || 'This post has been disabled due to community reports.'}
+              </p>
+              {post.disabledAt && (
+                <p className="text-gray-400 text-xs mt-2">
+                  Disabled on {new Date(post.disabledAt).toLocaleDateString()}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <h3 className="text-center font-semibold">Found: {post.title}</h3>
       <center>
         <div className="flex items-stretch justify-center gap-7 mt-1">
@@ -245,10 +294,16 @@ const navigateToChat = async () => {
                       </div>
                     )}
         </div>
-        <button type="button" className="mt-4 flex items-center text-rose-500 border-2 border-rose-500 hover:bg-rose-600 hover:text-white hover:border-rose-600 rounded-lg text-sm px-5 py-2.5 font-medium">
-          <MdOutlineReport className="w-5 h-5" />
-          <p className="ml-2">Report Post</p>
-        </button>
+        {post.email !== userEmail && (
+          <button 
+            type="button" 
+            onClick={handleReportClick}
+            className="mt-4 flex items-center text-rose-500 border-2 border-rose-500 hover:bg-rose-600 hover:text-white hover:border-rose-600 rounded-lg text-sm px-5 py-2.5 font-medium transition-colors"
+          >
+            <MdOutlineReport className="w-5 h-5" />
+            <p className="ml-2">Report Post</p>
+          </button>
+        )}
       </center>
     </div>
   );

@@ -435,10 +435,15 @@ export async function GET(req) {
 
     // Build filter object for search and category
     let filter = {};
+    
+    // Filter out disabled posts (unless requesting by ID which is handled above)
+    filter.isDisabled = { $ne: true };
 
     // Add email filter
     if (email) {
       filter.email = email;
+      // Show disabled posts to owner
+      delete filter.isDisabled;
     }
 
     // Add search query filter (search in title and description)
@@ -475,15 +480,15 @@ export async function GET(req) {
       );
     }
 
-    // If GPS is provided, filter posts within 5km radius and paginate in-memory
+    // If GPS is provided, filter posts within 10km radius and paginate in-memory
     if (userGps) {
       const allPosts = await FoundPost.find(filter).sort({ createdAt: -1 });
 
-      // Filter posts within 5km radius
+      // Filter posts within 10km radius
       const nearbyPosts = allPosts.filter((post) => {
         if (!post.gps) return false;
         const distance = getDistance(userGps, post.gps);
-        return isFinite(distance) && distance <= 5; // 5km radius
+        return isFinite(distance) && distance <= 10; // 10km radius
       });
 
       // Sort posts by distance

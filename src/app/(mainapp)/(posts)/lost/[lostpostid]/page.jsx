@@ -5,6 +5,7 @@ import Gmap2 from "@/components/map/Gmap2";
 import { MdOutlineReport, MdVerified } from "react-icons/md";
 import { IoChatboxEllipses } from "react-icons/io5";
 import { useParams } from "next/navigation";
+import ReportModal from "@/components/modals/ReportModal";
 
 import { useUser } from "@clerk/clerk-react";
 import { db } from "@/firebase/firebase.config";
@@ -24,6 +25,7 @@ export default function LostPostPage() {
   const { lostpostid } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [gps, setGps] = useState({
     lat: 7.487718248208046,
     lng: 80.36427172854248
@@ -190,8 +192,59 @@ const navigateToChat = async () => {
   const images = Array.isArray(post.photo) && post.photo.length ? post.photo : ["/slider/bag1.jpg"];
   const rewardText = post.reward ? `Rs.${post.price ?? 0}` : "None";
 
+  const handleReportClick = () => {
+    if (!isSignedIn || !userEmail) {
+      alert("Please sign in to report this post.");
+      return;
+    }
+    console.log('Opening report modal with data:', {
+      postId: post.lostPostId,
+      postType: 'lost',
+      title: post.title,
+      userEmail,
+      userId: user?.id
+    });
+    setIsReportModalOpen(true);
+  };
+
   return (
     <div className="pt-[23vh] lg:pt-44 px-4 mb-8">
+      {/* Report Modal */}
+      {post && (
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          postData={{
+            postId: post.lostPostId,
+            postType: 'lost',
+            title: post.title,
+          }}
+          userEmail={userEmail}
+          userId={user?.id}
+          postOwnerEmail={post.email}
+        />
+      )}
+      
+      {/* Disabled Post Warning */}
+      {post.isDisabled && (
+        <div className="max-w-4xl mx-auto mb-6 p-4 bg-red-900/30 border-2 border-red-600 rounded-lg">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">⛔</span>
+            <div>
+              <h3 className="font-bold text-red-400 text-lg mb-1">This Post Has Been Disabled</h3>
+              <p className="text-gray-300 text-sm">
+                {post.disabledReason || 'This post has been disabled due to community reports.'}
+              </p>
+              {post.email === userEmail && (
+                <p className="text-gray-400 text-xs mt-2">
+                  You can still view this post as the owner. Contact support if you believe this was a mistake.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      
       <h3 className="text-center font-semibold">Lost: {post.title}</h3>
       <center>
         <div className="flex items-stretch justify-center gap-7 mt-1">
@@ -249,10 +302,16 @@ const navigateToChat = async () => {
             </div>
           )}
         </div>
-        <button type="button" className="mt-4 flex items-center text-rose-500 border-2 border-rose-500 hover:bg-rose-600 hover:text-white hover:border-rose-600 rounded-lg text-sm px-5 py-2.5 font-medium">
-          <MdOutlineReport className="w-5 h-5" />
-          <p className="ml-2">Report Post</p>
-        </button>
+        {post.email !== userEmail && (
+          <button 
+            type="button" 
+            onClick={handleReportClick}
+            className="mt-4 flex items-center text-rose-500 border-2 border-rose-500 hover:bg-rose-600 hover:text-white hover:border-rose-600 rounded-lg text-sm px-5 py-2.5 font-medium transition-colors"
+          >
+            <MdOutlineReport className="w-5 h-5" />
+            <p className="ml-2">Report Post</p>
+          </button>
+        )}
       </center>
     </div>
   );

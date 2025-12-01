@@ -17,8 +17,12 @@ const pwaConfig = withPWA({
   register: true,
   skipWaiting: true,
   disable: false, // Enable in all environments
+  sw: 'sw.js', // Service worker filename
   publicExcludes: ['!icons/**/*'],
   buildExcludes: [/middleware-manifest\.json$/],
+  fallbacks: {
+    document: '/offline',
+  },
   runtimeCaching: [
     {
       urlPattern: /^https:\/\/.*/i,
