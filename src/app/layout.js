@@ -5,7 +5,7 @@ import { dark } from "@clerk/themes";
 import PWARegistration from "@/components/pwa/PWARegistration";
 
 import { Toaster } from "react-hot-toast";
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,10 +57,16 @@ export default function RootLayout({ children }) {
           <link rel="icon" type="image/png" href="/icons/192.png" />
           <link rel="apple-touch-icon" href="/icons/180.png" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
-          <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+          <meta
+            name="apple-mobile-web-app-status-bar-style"
+            content="default"
+          />
           <meta name="apple-mobile-web-app-title" content="Qreturn" />
           <meta name="mobile-web-app-capable" content="yes" />
-          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
+          <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes"
+          />
         </head>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}

@@ -10,7 +10,7 @@ const ReportsContent = () => {
   const { isSignedIn, user, isLoaded } = useUser();
   const searchParams = useSearchParams();
   const showMyPosts = searchParams.get("myPosts") === "true";
-  
+
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("active"); // active, resolved, dismissed, all
@@ -31,8 +31,8 @@ const ReportsContent = () => {
 
   const groupReportsByPost = (reportsList) => {
     const grouped = {};
-    
-    reportsList.forEach(report => {
+
+    reportsList.forEach((report) => {
       if (!grouped[report.postId]) {
         // First report for this post
         grouped[report.postId] = {
@@ -56,13 +56,16 @@ const ReportsContent = () => {
         grouped[report.postId].reportIds.push(report._id);
         // Merge upvotes
         grouped[report.postId].allUpvotes = [
-          ...new Set([...grouped[report.postId].allUpvotes, ...(report.upvotes || [])])
+          ...new Set([
+            ...grouped[report.postId].allUpvotes,
+            ...(report.upvotes || []),
+          ]),
         ];
         // Sum votes
         grouped[report.postId].totalVotes += report.voteCount || 0;
       }
     });
-    
+
     return Object.values(grouped);
   };
 
@@ -72,7 +75,7 @@ const ReportsContent = () => {
       const params = new URLSearchParams();
       if (filter !== "all") params.append("status", filter);
       params.append("sortBy", sortBy);
-      
+
       // Filter by post owner email if viewing "my posts"
       if (showMyPosts && userEmail) {
         params.append("postOwnerEmail", userEmail);
@@ -141,7 +144,8 @@ const ReportsContent = () => {
     const colors = {
       Spam: "bg-orange-100 text-orange-800 border-orange-300",
       "Inappropriate Content": "bg-red-100 text-red-800 border-red-300",
-      "Misleading Information": "bg-yellow-100 text-yellow-800 border-yellow-300",
+      "Misleading Information":
+        "bg-yellow-100 text-yellow-800 border-yellow-300",
       Scam: "bg-rose-100 text-rose-800 border-rose-300",
       "Duplicate Post": "bg-blue-100 text-blue-800 border-blue-300",
       Other: "bg-gray-100 text-gray-800 border-gray-300",
@@ -168,7 +172,7 @@ const ReportsContent = () => {
             {showMyPosts ? "Reports About My Posts" : "Reported Posts"}
           </h1>
           <p className="text-gray-400">
-            {showMyPosts 
+            {showMyPosts
               ? "View reports that have been submitted about your posts by the community."
               : "Community-reported posts that may violate guidelines. Vote on reports to help identify problematic content."}
           </p>
@@ -187,9 +191,12 @@ const ReportsContent = () => {
           <div className="flex items-start gap-3">
             <span className="text-xl">ℹ️</span>
             <div>
-              <h3 className="font-semibold text-blue-400 text-sm mb-1">Auto-Disable Notice</h3>
+              <h3 className="font-semibold text-blue-400 text-sm mb-1">
+                Auto-Disable Notice
+              </h3>
               <p className="text-gray-300 text-xs">
-                Posts that receive 10 or more report votes will be automatically disabled. Vote on reports to help maintain community standards.
+                Posts that receive 10 or more report votes will be automatically
+                disabled. Vote on reports to help maintain community standards.
               </p>
             </div>
           </div>
@@ -248,13 +255,21 @@ const ReportsContent = () => {
                   {/* Vote Section */}
                   <div className="flex flex-col items-center gap-1">
                     <button
-                      onClick={() => handleUpvote(report.reportIds ? report.reportIds[0] : report._id)}
+                      onClick={() =>
+                        handleUpvote(
+                          report.reportIds ? report.reportIds[0] : report._id
+                        )
+                      }
                       className={`p-2 rounded-lg transition-colors ${
                         hasUserUpvoted(report)
                           ? "bg-blue-600 text-white"
                           : "bg-gray-700 text-gray-400 hover:bg-gray-600"
                       }`}
-                      title={hasUserUpvoted(report) ? "Remove vote" : "Upvote this report"}
+                      title={
+                        hasUserUpvoted(report)
+                          ? "Remove vote"
+                          : "Upvote this report"
+                      }
                     >
                       {hasUserUpvoted(report) ? (
                         <MdThumbUp size={20} />
@@ -262,7 +277,9 @@ const ReportsContent = () => {
                         <MdThumbUpOffAlt size={20} />
                       )}
                     </button>
-                    <span className="text-lg font-bold">{report.totalVotes || report.voteCount}</span>
+                    <span className="text-lg font-bold">
+                      {report.totalVotes || report.voteCount}
+                    </span>
                     <span className="text-xs text-gray-500">votes</span>
                   </div>
 
@@ -299,14 +316,18 @@ const ReportsContent = () => {
                           report.reasons.map((reason, idx) => (
                             <span
                               key={idx}
-                              className={`text-xs px-3 py-1 rounded-full border ${getReasonColor(reason)}`}
+                              className={`text-xs px-3 py-1 rounded-full border ${getReasonColor(
+                                reason
+                              )}`}
                             >
                               {reason}
                             </span>
                           ))
                         ) : (
                           <span
-                            className={`text-xs px-3 py-1 rounded-full border ${getReasonColor(report.reason)}`}
+                            className={`text-xs px-3 py-1 rounded-full border ${getReasonColor(
+                              report.reason
+                            )}`}
                           >
                             {report.reason}
                           </span>
@@ -322,16 +343,20 @@ const ReportsContent = () => {
                             <p className="text-gray-300">
                               {expandedReportId === report._id
                                 ? desc
-                                : `${desc.substring(0, 150)}${desc.length > 150 ? "..." : ""}`}
+                                : `${desc.substring(0, 150)}${
+                                    desc.length > 150 ? "..." : ""
+                                  }`}
                             </p>
                           </div>
                         ))}
-                        {report.descriptions.some(d => d.length > 150) && (
+                        {report.descriptions.some((d) => d.length > 150) && (
                           <button
                             onClick={() => toggleExpand(report._id)}
                             className="text-blue-400 hover:text-blue-300 text-sm"
                           >
-                            {expandedReportId === report._id ? "Show less" : "Show more"}
+                            {expandedReportId === report._id
+                              ? "Show less"
+                              : "Show more"}
                           </button>
                         )}
                       </div>
@@ -349,7 +374,9 @@ const ReportsContent = () => {
                             onClick={() => toggleExpand(report._id)}
                             className="text-blue-400 hover:text-blue-300 text-sm mb-3"
                           >
-                            {expandedReportId === report._id ? "Show less" : "Show more"}
+                            {expandedReportId === report._id
+                              ? "Show less"
+                              : "Show more"}
                           </button>
                         )}
                       </>
@@ -358,13 +385,16 @@ const ReportsContent = () => {
                     {/* Meta Info */}
                     <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
                       <span>
-                        {new Date(report.createdAt).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {new Date(report.createdAt).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
                       </span>
                       <span>•</span>
                       <span
@@ -404,13 +434,15 @@ const ReportsContent = () => {
 
 const ReportsPage = () => {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-900 pt-24 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center text-gray-400">Loading reports...</div>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-900 pt-24 px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center text-gray-400">Loading reports...</div>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ReportsContent />
     </Suspense>
   );

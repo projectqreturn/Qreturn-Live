@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import FileUploadArea from "../../../components/fileupload/FileUpload";
 import PostCard from "../../../components/postcard/PostCard";
@@ -137,7 +136,7 @@ export default function SearchPage() {
             aria-hidden="true"
           />
           <p className="m-0 text-white/60 text-sm">
-            AI Image Searcher is a beta feature designed to assist in matching
+            AI Image Search is a beta feature designed to assist in matching
             lost and found items through automated photo scanning and
             comparison. As this feature is experimental, search results may be
             incomplete or inaccurate. please verify any matches manually.

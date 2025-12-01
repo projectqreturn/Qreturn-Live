@@ -9,13 +9,12 @@ import ReportModal from "@/components/modals/ReportModal";
 
 import { useUser } from "@clerk/clerk-react";
 import { db } from "@/firebase/firebase.config";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import {
-  addDoc,
-  collection,
-  getDocs,
-  query, where,
-} from "firebase/firestore";
-import { notifyNewMessage, NOTIFICATION_TYPES, createNotification } from '@/app/lib/notification/notification';
+  notifyNewMessage,
+  NOTIFICATION_TYPES,
+  createNotification,
+} from "@/app/lib/notification/notification";
 
 export default function LostPostPage() {
   // clerk user data
@@ -28,7 +27,7 @@ export default function LostPostPage() {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [gps, setGps] = useState({
     lat: 7.487718248208046,
-    lng: 80.36427172854248
+    lng: 80.36427172854248,
   });
 
   // Set user email when loaded clerk user data
@@ -38,14 +37,15 @@ export default function LostPostPage() {
     }
   }, [isLoaded, isSignedIn, user]);
 
-
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(`/api/post/lost?id=${lostpostid}`, { cache: "no-store" });
+        const res = await fetch(`/api/post/lost?id=${lostpostid}`, {
+          cache: "no-store",
+        });
         const data = await res.json();
         setPost(data.post || null);
-        console.log('post Data:',data.post);
+        console.log("post Data:", data.post);
 
         // Handle GPS coordinates update
         if (data.post?.gps) {
@@ -77,119 +77,122 @@ export default function LostPostPage() {
 
   // Chat check functionality
 
-// Chat check functionality - returns chat ID if exists, null otherwise
-const checkChatExists = async () => {
-  console.log("Checking if chat exists...");
-  try {
-    const q = query(
-      collection(db, "chatRoom"),
-      where("postId", "==", post.lostPostId),
-      where("chatOwner", "==", userEmail)
-    );
-    const querySnapshot = await getDocs(q);
+  // Chat check functionality - returns chat ID if exists, null otherwise
+  const checkChatExists = async () => {
+    console.log("Checking if chat exists...");
+    try {
+      const q = query(
+        collection(db, "chatRoom"),
+        where("postId", "==", post.lostPostId),
+        where("chatOwner", "==", userEmail)
+      );
+      const querySnapshot = await getDocs(q);
 
-    if (!querySnapshot.empty) {
-      console.log("Chat already exists.");
-      return querySnapshot.docs[0].id; // Return chat ID directly
-    } else {
-      console.log("Chat does not exist.");
+      if (!querySnapshot.empty) {
+        console.log("Chat already exists.");
+        return querySnapshot.docs[0].id; // Return chat ID directly
+      } else {
+        console.log("Chat does not exist.");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error checking chat:", error);
       return null;
     }
-  } catch (error) {
-    console.error("Error checking chat:", error);
-    return null;
-  }
-};
+  };
 
-// Create chat function - returns the new chat ID
-const createChat = async () => {
-  console.log("Creating chat with post owner...");
-  try {
-    const docRef = await addDoc(collection(db, "chatRoom"), {
-      title: `${post.title}`,
-      postId: post.lostPostId,
-      postOwner: post.email,
-      postOwnerUserId: post.clerkUserId || "", // Store Clerk user ID for notifications
-      postPhoto: post.photo[0],
-      chatOwner: userEmail,
-      chatOwnerUserId: user?.id || "", // Store Clerk user ID for notifications
-      createdAt: new Date()
-    });
-    console.log("Chat created with ID:", docRef.id);
-    
-    // Notify the post owner about the new chat
-    const postOwnerId = post.clerkUserId;
-    if (postOwnerId && postOwnerId !== "") {
-      try {
-        await createNotification({
-          userId: postOwnerId,
-          type: NOTIFICATION_TYPES.MESSAGE,
-          title: 'New Chat About Your Lost Item',
-          message: `Someone wants to chat about your lost item: ${post.title}`,
-          data: { 
-            chatId: docRef.id,
-            postId: post.lostPostId,
-            itemTitle: post.title,
-            chatInitiator: userEmail
-          },
-          link: `/chats/${docRef.id}`,
-          priority: 'high'
-        });
-        console.log('Notification sent to post owner');
-      } catch (notifError) {
-        console.error('Failed to send notification:', notifError);
-        // Don't fail the chat creation if notification fails
+  // Create chat function - returns the new chat ID
+  const createChat = async () => {
+    console.log("Creating chat with post owner...");
+    try {
+      const docRef = await addDoc(collection(db, "chatRoom"), {
+        title: `${post.title}`,
+        postId: post.lostPostId,
+        postOwner: post.email,
+        postOwnerUserId: post.clerkUserId || "", // Store Clerk user ID for notifications
+        postPhoto: post.photo[0],
+        chatOwner: userEmail,
+        chatOwnerUserId: user?.id || "", // Store Clerk user ID for notifications
+        createdAt: new Date(),
+      });
+      console.log("Chat created with ID:", docRef.id);
+
+      // Notify the post owner about the new chat
+      const postOwnerId = post.clerkUserId;
+      if (postOwnerId && postOwnerId !== "") {
+        try {
+          await createNotification({
+            userId: postOwnerId,
+            type: NOTIFICATION_TYPES.MESSAGE,
+            title: "New Chat About Your Lost Item",
+            message: `Someone wants to chat about your lost item: ${post.title}`,
+            data: {
+              chatId: docRef.id,
+              postId: post.lostPostId,
+              itemTitle: post.title,
+              chatInitiator: userEmail,
+            },
+            link: `/chats/${docRef.id}`,
+            priority: "high",
+          });
+          console.log("Notification sent to post owner");
+        } catch (notifError) {
+          console.error("Failed to send notification:", notifError);
+          // Don't fail the chat creation if notification fails
+        }
       }
+
+      return docRef.id; // Return the newly created chat ID
+    } catch (error) {
+      console.error("Error creating chat:", error);
+      return null;
     }
-    
-    return docRef.id; // Return the newly created chat ID
-  } catch (error) {
-    console.error("Error creating chat:", error);
-    return null;
-  }
-};
+  };
 
-// Navigate to chat handler - simplified logic
-const navigateToChat = async () => {
-  console.log("Navigating to chat...");
+  // Navigate to chat handler - simplified logic
+  const navigateToChat = async () => {
+    console.log("Navigating to chat...");
 
-  // Prevent action if user is not signed in
-  if (!isSignedIn || !userEmail) {
-    alert("Please sign in to chat with the post owner.");
-    return;
-  }
-
-  // Prevent chatting with yourself
-  if (post.email === userEmail) {
-    alert("You cannot chat with yourself.");
-    return;
-  }
-
-  try {
-    // First, check if chat already exists
-    let chatId = await checkChatExists();
-
-    // If no chat exists, create one
-    if (!chatId) {
-      console.log("Creating new chat...");
-      chatId = await createChat();
+    // Prevent action if user is not signed in
+    if (!isSignedIn || !userEmail) {
+      alert("Please sign in to chat with the post owner.");
+      return;
     }
 
-    // Navigate to chat if we have a valid ID
-    if (chatId) {
-      console.log(`Redirecting to /chats/${chatId}`);
-      window.location.href = `/chats/${chatId}`;
-    } else {
-      console.error("Failed to get or create chat.");
-      alert("Failed to start chat. Please try again.");
+    // Prevent chatting with yourself
+    if (post.email === userEmail) {
+      alert("You cannot chat with yourself.");
+      return;
     }
-  } catch (error) {
-    console.error("Error navigating to chat:", error);
-    alert("An error occurred. Please try again.");
-  }
-};
 
-  const images = Array.isArray(post.photo) && post.photo.length ? post.photo : ["/slider/bag1.jpg"];
+    try {
+      // First, check if chat already exists
+      let chatId = await checkChatExists();
+
+      // If no chat exists, create one
+      if (!chatId) {
+        console.log("Creating new chat...");
+        chatId = await createChat();
+      }
+
+      // Navigate to chat if we have a valid ID
+      if (chatId) {
+        console.log(`Redirecting to /chats/${chatId}`);
+        window.location.href = `/chats/${chatId}`;
+      } else {
+        console.error("Failed to get or create chat.");
+        alert("Failed to start chat. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error navigating to chat:", error);
+      alert("An error occurred. Please try again.");
+    }
+  };
+
+  const images =
+    Array.isArray(post.photo) && post.photo.length
+      ? post.photo
+      : ["/slider/bag1.jpg"];
   const rewardText = post.reward ? `Rs.${post.price ?? 0}` : "None";
 
   const handleReportClick = () => {
@@ -197,12 +200,12 @@ const navigateToChat = async () => {
       alert("Please sign in to report this post.");
       return;
     }
-    console.log('Opening report modal with data:', {
+    console.log("Opening report modal with data:", {
       postId: post.lostPostId,
-      postType: 'lost',
+      postType: "lost",
       title: post.title,
       userEmail,
-      userId: user?.id
+      userId: user?.id,
     });
     setIsReportModalOpen(true);
   };
@@ -216,7 +219,7 @@ const navigateToChat = async () => {
           onClose={() => setIsReportModalOpen(false)}
           postData={{
             postId: post.lostPostId,
-            postType: 'lost',
+            postType: "lost",
             title: post.title,
           }}
           userEmail={userEmail}
@@ -224,27 +227,31 @@ const navigateToChat = async () => {
           postOwnerEmail={post.email}
         />
       )}
-      
+
       {/* Disabled Post Warning */}
       {post.isDisabled && (
         <div className="max-w-4xl mx-auto mb-6 p-4 bg-red-900/30 border-2 border-red-600 rounded-lg">
           <div className="flex items-start gap-3">
             <span className="text-2xl">⛔</span>
             <div>
-              <h3 className="font-bold text-red-400 text-lg mb-1">This Post Has Been Disabled</h3>
+              <h3 className="font-bold text-red-400 text-lg mb-1">
+                This Post Has Been Disabled
+              </h3>
               <p className="text-gray-300 text-sm">
-                {post.disabledReason || 'This post has been disabled due to community reports.'}
+                {post.disabledReason ||
+                  "This post has been disabled due to community reports."}
               </p>
               {post.email === userEmail && (
                 <p className="text-gray-400 text-xs mt-2">
-                  You can still view this post as the owner. Contact support if you believe this was a mistake.
+                  You can still view this post as the owner. Contact support if
+                  you believe this was a mistake.
                 </p>
               )}
             </div>
           </div>
         </div>
       )}
-      
+
       <h3 className="text-center font-semibold">Lost: {post.title}</h3>
       <center>
         <div className="flex items-stretch justify-center gap-7 mt-1">
@@ -265,29 +272,46 @@ const navigateToChat = async () => {
       <center>
         <div className="max-w-md lg:max-w-2xl mb-3">
           <div>
-            <h3 className="text-left font-semibold mt-5 mb-2">Have you seen it? Contact</h3>
+            <h3 className="text-left font-semibold mt-5 mb-2">
+              Have you seen it? Contact
+            </h3>
             {post.is_verified && (
               <div className="flex items-center gap-1 mb-2">
                 <MdVerified className="text-blue-500" size={18} />
                 <span className="text-sm text-gray-600">Verified User</span>
               </div>
             )}
-            <p className="text-left">Phone: <span className="text-blue-500 font-bold">{post.phone}</span></p>
-            <p className="text-left">Email: <span className="text-blue-500 font-bold">{post.email}</span></p>
+            <p className="text-left">
+              Phone:{" "}
+              <span className="text-blue-500 font-bold">{post.phone}</span>
+            </p>
+            <p className="text-left">
+              Email:{" "}
+              <span className="text-blue-500 font-bold">{post.email}</span>
+            </p>
           </div>
           <div>
             <h3 className="text-left font-semibold mt-5 mb-2">Location</h3>
-            <Gmap2 lat={gps.lat} lng={gps.lng} name={post.District} className="rounded-lg" />
+            <Gmap2
+              lat={gps.lat}
+              lng={gps.lng}
+              name={post.District}
+              className="rounded-lg"
+            />
           </div>
           <div>
             <h3 className="text-left font-semibold mt-3 mb-2">Description</h3>
             <p className="text-left">{post.description}</p>
           </div>
           <div className="mt-5">
-            <p className="text-left">Category: <span className="underline">{post.Category}</span></p>
+            <p className="text-left">
+              Category: <span className="underline">{post.Category}</span>
+            </p>
           </div>
           <div className="mt-3 text-left">
-            <p className="font-bold">Post ID: <span className="text-blue-500">{post.lostPostId}</span></p>
+            <p className="font-bold">
+              Post ID: <span className="text-blue-500">{post.lostPostId}</span>
+            </p>
           </div>
           {post.email !== userEmail && (
             <div className="flex items-left justify-left gap-4 mt-5">
@@ -303,8 +327,8 @@ const navigateToChat = async () => {
           )}
         </div>
         {post.email !== userEmail && (
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={handleReportClick}
             className="mt-4 flex items-center text-rose-500 border-2 border-rose-500 hover:bg-rose-600 hover:text-white hover:border-rose-600 rounded-lg text-sm px-5 py-2.5 font-medium transition-colors"
           >

@@ -4,7 +4,6 @@ import PostCard from "@/components/postcard/PostCard";
 import { usePathname, useRouter } from "next/navigation";
 import PostPageNav from "@/components/PostPageNav/PostPageNav";
 
-
 export default function Index() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [posts, setPosts] = useState([]);
@@ -38,7 +37,9 @@ export default function Index() {
         }
       );
     } else {
-      console.error("Geolocation is not supported by your browser or localStorage is not defined");
+      console.error(
+        "Geolocation is not supported by your browser or localStorage is not defined"
+      );
       setLoading(false);
     }
   };
@@ -138,7 +139,10 @@ export default function Index() {
         const data = await res.json();
         const list = Array.isArray(data.posts) ? data.posts : [];
         const mapped = list.map((p) => {
-          const imageUrl = Array.isArray(p.photo) && p.photo.length ? p.photo[0] : "/slider/bag1.jpg";
+          const imageUrl =
+            Array.isArray(p.photo) && p.photo.length
+              ? p.photo[0]
+              : "/slider/bag1.jpg";
           if (isLost) {
             return {
               id: p.lostPostId ?? p._id,
@@ -178,8 +182,16 @@ export default function Index() {
     return () => {
       isMounted = false;
     };
-  }, [endpoint, isLost, savedFindNearby, userLocation, selectedLocation, page, searchQuery, searchCategory]);
-
+  }, [
+    endpoint,
+    isLost,
+    savedFindNearby,
+    userLocation,
+    selectedLocation,
+    page,
+    searchQuery,
+    searchCategory,
+  ]);
 
   return (
     <div className="min-h-screen flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white sm:mt-10 mt-20">
@@ -189,7 +201,10 @@ export default function Index() {
             Array(6)
               .fill(0)
               .map((_, index) => (
-                <div key={index} className="post-card flex items-start gap-3 p-3 rounded-xl animate-pulse">
+                <div
+                  key={index}
+                  className="post-card flex items-start gap-3 p-3 rounded-xl animate-pulse"
+                >
                   <div className="h-24 w-24 bg-gray-200 rounded-lg"></div>
                   <div className="flex-1">
                     <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
@@ -200,7 +215,9 @@ export default function Index() {
                 </div>
               ))
           ) : posts.length === 0 ? (
-            <p className="text-center text-gray-500 col-span-full">No posts found.</p>
+            <p className="text-center text-gray-500 col-span-full">
+              No posts found.
+            </p>
           ) : (
             posts.map((post, index) => (
               <div
