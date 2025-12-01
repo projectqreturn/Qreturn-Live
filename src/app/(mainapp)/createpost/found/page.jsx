@@ -45,6 +45,7 @@ export default function FoundItemForm() {
   const [userEmail, setUserEmail] = useState(""); // to store user email
   const [files, setFiles] = useState([]);
   const [foundDate, setFoundDate] = useState(null);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
 
   // Set user email when loaded clerk user data
   useEffect(() => {
@@ -301,7 +302,11 @@ export default function FoundItemForm() {
 
           <div>
             <label className="block mb-2 font-bold">Photos</label>
-            <FileUploadArea files={files} setFiles={setFiles} />
+            <FileUploadArea 
+              files={files} 
+              setFiles={setFiles}
+              onUploadStatusChange={setIsUploadingImages}
+            />
           </div>
         </div>
       </div>
@@ -310,9 +315,14 @@ export default function FoundItemForm() {
       <div className="flex md:justify-start justify-center">
         <button
           onClick={handleSubmit}
-          className="w-48 p-3 bg-green-400 hover:bg-green-500 rounded-md font-bold mt-6 text-black transition-colors"
+          disabled={isUploadingImages}
+          className={`w-48 p-3 rounded-md font-bold mt-6 text-black transition-colors ${
+            isUploadingImages 
+              ? 'bg-gray-400 cursor-not-allowed' 
+              : 'bg-green-400 hover:bg-green-500'
+          }`}
         >
-          Post
+          {isUploadingImages ? 'Uploading Images...' : 'Post'}
         </button>
       </div>
     </div>

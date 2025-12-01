@@ -50,38 +50,33 @@ export async function POST(req) {
 
     // Handle main image upload if photos exist
     let searchId = null;
-    // COMMENTED OUT - Image upload to external API causing errors
-    // if (photo && photo.length > 0) {
-    //   const mainImageUrl = photo[0]; // First image is the main image
-    //   console.log("Uploading main image to external API:", mainImageUrl);
-    //   
-    //   try {
-    //     // Upload main image and get UUID-based search ID
-    //     const uploadResult = await uploadMainImageToExternalApi(mainImageUrl, 'lost');
-    //     console.log("Upload result received:", uploadResult);
-    //     
-    //     if (uploadResult && uploadResult.searchId) {
-    //       searchId = uploadResult.searchId;
-    //       console.log("Image uploaded successfully with search ID:", searchId);
-    //     } else {
-    //       console.error("Upload result missing searchId:", uploadResult);
-    //       throw new Error("Image upload did not return a valid search ID");
-    //     }
-    //   } catch (uploadError) {
-    //     console.error("Error uploading image to external API:", uploadError);
-    //     console.error("Error details:", uploadError.message);
-    //     // Fail the post creation if image upload fails when photos are provided
-    //     return NextResponse.json(
-    //       { 
-    //         message: "Failed to upload image to search service", 
-    //         error: uploadError.message 
-    //       },
-    //       { status: 500 }
-    //     );
-    //   }
-    // } else {
-    //   console.log('No photos provided, skipping image upload');
-    // }
+    if (photo && photo.length > 0) {
+      const mainImageUrl = photo[0]; // First image is the main image
+      console.log("Uploading main image to external API:", mainImageUrl);
+      
+      try {
+        // Upload main image and get UUID-based search ID
+        const uploadResult = await uploadMainImageToExternalApi(mainImageUrl, 'lost');
+        console.log("Upload result received:", uploadResult);
+        
+        if (uploadResult && uploadResult.success && uploadResult.searchId) {
+          searchId = uploadResult.searchId;
+          console.log("✅ Image uploaded successfully with search ID:", searchId);
+        } else {
+          console.warn("⚠️ External API upload failed, continuing without search_Id:", uploadResult?.error || 'Unknown error');
+          // Continue without search_Id - post creation will still work
+          searchId = null;
+        }
+      } catch (uploadError) {
+        console.error("❌ Error uploading image to external API:", uploadError);
+        console.error("Error details:", uploadError.message);
+        console.warn("⚠️ Continuing post creation without external image search functionality");
+        // Continue with post creation even if external API fails
+        searchId = null;
+      }
+    } else {
+      console.log('No photos provided, skipping image upload');
+    }
 
     // Add search_Id, user verification status, and clerkUserId to data
     const postData = { 

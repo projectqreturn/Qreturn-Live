@@ -109,24 +109,19 @@ export async function POST(req) {
           const uploadResult = await uploadMainImageToExternalApi(mainImageUrl, 'found');
           console.log('Upload result received:', uploadResult);
           
-          if (uploadResult && uploadResult.searchId) {
+          if (uploadResult && uploadResult.success && uploadResult.searchId) {
             searchId = uploadResult.searchId;
-            console.log('Main image uploaded with search_Id:', searchId);
+            console.log('✅ Image uploaded successfully with search ID:', searchId);
           } else {
-            console.error('Upload result missing searchId:', uploadResult);
-            throw new Error('Image upload did not return a valid search ID');
+            console.warn('⚠️ External API upload failed, continuing without search_Id:', uploadResult?.error || 'Unknown error');
+            searchId = '';
           }
         } catch (uploadError) {
-          console.error('Failed to upload main image:', uploadError);
+          console.error('❌ Error uploading image to external API:', uploadError);
           console.error('Error details:', uploadError.message);
-          // Fail the post creation if image upload fails when photos are provided
-          return NextResponse.json(
-            { 
-              message: 'Failed to upload image to search service', 
-              error: uploadError.message 
-            },
-            { status: 500 }
-          );
+          console.warn('⚠️ Continuing post creation without external image search functionality');
+          // Continue with post creation even if external API fails
+          searchId = '';
         }
       } else {
         console.log('No photos provided, creating post without search_Id');

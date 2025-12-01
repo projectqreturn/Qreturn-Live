@@ -14,7 +14,9 @@ export async function uploadMainImageToExternalApi(imageUrl, postType) {
   try {
     // Fetch the image from Cloudinary
     console.log('Fetching image from Cloudinary...');
-    const imageResponse = await fetch(imageUrl);
+    const imageResponse = await fetch(imageUrl, {
+      signal: AbortSignal.timeout(10000) // 10 second timeout
+    });
     if (!imageResponse.ok) {
       throw new Error(`Failed to fetch image from Cloudinary: ${imageResponse.status} ${imageResponse.statusText}`);
     }
@@ -62,6 +64,7 @@ export async function uploadMainImageToExternalApi(imageUrl, postType) {
     const uploadResponse = await fetch(uploadUrl, {
       method: 'POST',
       body: formData,
+      signal: AbortSignal.timeout(15000) // 15 second timeout for upload
     });
 
     console.log('External API response status:', uploadResponse.status);
@@ -88,6 +91,13 @@ export async function uploadMainImageToExternalApi(imageUrl, postType) {
     console.error('Error type:', error.constructor.name);
     console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);
-    throw error;
+    
+    // Return failure status instead of throwing - allows post creation to continue
+    console.warn('⚠️ External API upload failed, but post creation will continue without search_Id');
+    return {
+      searchId: null,
+      success: false,
+      error: error.message
+    };
   }
 }

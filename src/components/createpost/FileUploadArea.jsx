@@ -3,10 +3,17 @@ import React, { useState, useCallback } from "react";
 import { UploadCloud } from "lucide-react";
 import { uploadToCloudinary } from "@/app/lib/utils/cloudinaryUpload";
 
-function FileUploadArea({ files, setFiles }) {
+function FileUploadArea({ files, setFiles, onUploadStatusChange }) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const MAX_FILES = 5;
+
+  // Notify parent when upload status changes
+  React.useEffect(() => {
+    if (onUploadStatusChange) {
+      onUploadStatusChange(uploading);
+    }
+  }, [uploading, onUploadStatusChange]);
 
   // ✅ Allowed MIME types
   const allowedTypes = [
