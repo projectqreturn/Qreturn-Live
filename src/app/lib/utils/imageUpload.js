@@ -53,10 +53,11 @@ export async function uploadMainImageToExternalApi(imageUrl, postType) {
     const formData = new FormData();
     formData.append('file', renamedFile);
 
-    // Upload to external API
-    const baseUrl = process.env.NEXT_PUBLIC_IMAGE_API_URL || 'http://13.229.70.244:8000';
-    const uploadUrl = `${baseUrl}/upload-image`;
-    console.log('Uploading to external API:', uploadUrl);
+    // Upload to external API with type-specific endpoint
+    const baseUrl = process.env.NEXT_PUBLIC_IMAGE_API_URL || 'http://18.136.211.184:8000';
+    const endpoint = postType === 'lost' ? 'upload-lost-image' : 'upload-found-image';
+    const uploadUrl = `${baseUrl}/${endpoint}`;
+    console.log(`Uploading ${postType} image to external API:`, uploadUrl);
     
     const uploadResponse = await fetch(uploadUrl, {
       method: 'POST',

@@ -8,7 +8,6 @@ import {
   getMyItemsByCategory,
   getMyItemsByUserId
 } from "../../lib/actions/myitems.action";
-import { uploadMainImageToExternalApi } from "../../lib/utils/imageUpload";
 import { deleteImageFromExternalApi } from "../../lib/utils/imageDelete";
 
 // GET all items, or by query (category/userId), or by id (if /myitems?id=...)
@@ -40,30 +39,6 @@ export async function POST(req) {
     const data = await req.json();
     // Remove gps if present in request body
     if (data.gps) delete data.gps;
-    
-    // Handle main image upload if photos exist
-    let searchId = null;
-    if (data.photo && data.photo.length > 0) {
-      try {
-        const mainImageUrl = data.photo[0]; // First image is the main image
-        console.log("Uploading main image to external API:", mainImageUrl);
-        
-        // Upload main image and get UUID-based search ID
-        const uploadResult = await uploadMainImageToExternalApi(mainImageUrl, 'myitem');
-        searchId = uploadResult.searchId;
-        
-        console.log("Image uploaded successfully with search ID:", searchId);
-      } catch (uploadError) {
-        console.error("Error uploading image to external API:", uploadError);
-        // Continue with item creation even if image upload fails
-        // You can choose to throw error here if image upload is mandatory
-      }
-    }
-    
-    // Add search_Id to data if generated
-    if (searchId) {
-      data.search_Id = searchId;
-    }
     
     const newItem = await createMyItem(data);
     
