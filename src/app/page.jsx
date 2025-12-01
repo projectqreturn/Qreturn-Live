@@ -11,6 +11,7 @@ import { IoBagRemove } from "react-icons/io5";
 import { MdOutlinePhoneIphone, MdFace, MdOutlinePets } from "react-icons/md";
 import { RiShapesFill } from "react-icons/ri";
 import Loader from "@/components/landingpage/radaranimation/Loader";
+import { FaCar } from "react-icons/fa6";
 
 import { MdQrCode2, MdVerified, MdOutlineShareLocation } from "react-icons/md";
 import { GiReceiveMoney } from "react-icons/gi";
@@ -65,6 +66,15 @@ export default function Home() {
                 gradient="bg-gradient-to-br from-gray-600 to-gray-800"
               />
               <span className="mt-2 font-semibold text-gray-400">Personal</span>
+            </div>
+            <div className="flex flex-col items-center ">
+              <GradientCard
+                icon={
+                  <FaCar className="sm:h-14 sm:w-14 h-10 w-10 text-gray-400" />
+                }
+                gradient="bg-gradient-to-br from-gray-600 to-gray-800"
+              />
+              <span className="mt-2 font-semibold text-gray-400">Vehicles</span>
             </div>
 
             {/* Card 2 */}
@@ -178,7 +188,8 @@ export default function Home() {
                 Ai Image Search
               </h2>
               <p className="sm:text-lg text-base text-gray-400">
-                Use AI-powered image recognition to search for <br />lost & Found items by uploading a photo. <br />
+                Use AI-powered image recognition to search for <br />
+                lost & Found items by uploading a photo. <br />
                 Quickly find matches and connect with finders,
                 <br />
                 making the recovery process more efficient.

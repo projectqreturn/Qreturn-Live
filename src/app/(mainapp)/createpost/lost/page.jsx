@@ -7,7 +7,7 @@ import GmapLocationFetch from "@/components/map/NewGmapLocationFetch";
 import { FaLocationArrow } from "react-icons/fa6";
 
 import { useRouter } from "next/navigation";
-import toast, { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from "react-hot-toast";
 
 import { useUser } from "@clerk/clerk-react";
 
@@ -49,8 +49,8 @@ export default function LostItemForm() {
   const [lostDate, setLostDate] = useState(null);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
 
-    // Set user email when loaded clerk user data
-    useEffect(() => {
+  // Set user email when loaded clerk user data
+  useEffect(() => {
     if (isLoaded && isSignedIn) {
       setUserEmail(user.primaryEmailAddress?.emailAddress || "");
     }
@@ -60,7 +60,7 @@ export default function LostItemForm() {
   const [gps, setGps] = useState({
     lat: 7.487718248208046,
     lng: 80.36427172854248,
-    name: "Default Location"
+    name: "Default Location",
   });
 
   // Fetch current location on component mount
@@ -86,7 +86,7 @@ export default function LostItemForm() {
         {
           enableHighAccuracy: true,
           timeout: 10000,
-          maximumAge: 300000
+          maximumAge: 300000,
         }
       );
     } else {
@@ -98,7 +98,7 @@ export default function LostItemForm() {
   const handleLocationChange = (newLocation) => {
     setGps({
       lat: newLocation.lat,
-      lng: newLocation.lng
+      lng: newLocation.lng,
     });
     console.log("Location updated:", newLocation);
     toast.success("Location selected successfully!");
@@ -118,12 +118,14 @@ export default function LostItemForm() {
 
   const handleSubmit = async () => {
     // Validate required fields
-    if (!itemNameRef.current?.value ||
+    if (
+      !itemNameRef.current?.value ||
       !lostDate ||
       !phoneRef.current?.value ||
       !categoryRef.current?.value ||
       !locationRef.current?.value ||
-      !descriptionRef.current?.value) {
+      !descriptionRef.current?.value
+    ) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -137,7 +139,9 @@ export default function LostItemForm() {
       description: descriptionRef.current?.value,
       email: userEmail,
       clerkUserId: user?.id || "", // Add Clerk user ID for notifications
-      photo: files.map(f => (typeof f === "string" ? f : f.url)).filter(Boolean),
+      photo: files
+        .map((f) => (typeof f === "string" ? f : f.url))
+        .filter(Boolean),
       postType: "lost",
       reward: showReward,
       price: showReward ? rewardAmountRef.current?.value : null,
@@ -148,34 +152,36 @@ export default function LostItemForm() {
 
     // Insert data into database
     try {
-      toast.loading('Creating post...');
+      toast.loading("Creating post...");
       const res = await fetch("/api/post/lost", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
-      
+
       toast.dismiss();
-      
+
       // Check if response is JSON
       const contentType = res.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         const textResponse = await res.text();
         console.error("Non-JSON response:", textResponse);
-        throw new Error("Server returned an error. Please check the console and restart the development server.");
+        throw new Error(
+          "Server returned an error. Please check the console and restart the development server."
+        );
       }
-      
+
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.message || "Failed to create post");
       }
 
       console.log("Response from API:", data);
-      toast.success('Post published successfully!');
+      toast.success("Post published successfully!");
       setTimeout(() => {
-        router.push('/lost');
+        router.push("/lost");
       }, 1500);
     } catch (error) {
       console.error("Error posting data:", error);
@@ -192,9 +198,7 @@ export default function LostItemForm() {
         {/* Left side: Form fields */}
         <div className="space-y-6 md:w-1/2">
           <div>
-            <label className="block mb-2 font-bold">
-              Lost Item Name / Title
-            </label>
+            <label className="block mb-2 font-bold">Name / Title</label>
             <input
               ref={itemNameRef}
               maxLength={50}
@@ -240,6 +244,7 @@ export default function LostItemForm() {
                 Select Category
               </option>
               <option value="Personal">Personal</option>
+              <option value="Vehicle">Vehicle</option>
               <option value="Electronics">Electronics</option>
               <option value="People">People</option>
               <option value="Pets & Animals">Pets & Animals</option>
@@ -279,13 +284,15 @@ export default function LostItemForm() {
             <div className="flex items-center gap-3">
               <label className="block font-bold">Reward</label>
               <div
-                className={`w-12 h-6 rounded-full p-1 cursor-pointer ${showReward ? "bg-green-400" : "bg-gray-700"
-                  }`}
+                className={`w-12 h-6 rounded-full p-1 cursor-pointer ${
+                  showReward ? "bg-green-400" : "bg-gray-700"
+                }`}
                 onClick={() => setShowReward(!showReward)}
               >
                 <div
-                  className={`bg-white w-4 h-4 rounded-full transform transition-transform ${showReward ? "translate-x-6" : ""
-                    }`}
+                  className={`bg-white w-4 h-4 rounded-full transform transition-transform ${
+                    showReward ? "translate-x-6" : ""
+                  }`}
                 />
               </div>
             </div>
@@ -314,11 +321,15 @@ export default function LostItemForm() {
         {/* Right side:  Map and File Upload */}
         <div className="space-y-6 md:w-1/2">
           <div>
-            <h3 className="text-left font-semibold mb-4">Select Lost Location</h3>
+            <h3 className="text-left font-semibold mb-4">
+              Select Lost Location
+            </h3>
 
             {/* Location Info Display */}
             <div className="bg-gray-800 p-3 rounded-lg mb-4">
-              <h4 className="font-medium text-sm text-gray-300 mb-1">Selected Location:</h4>
+              <h4 className="font-medium text-sm text-gray-300 mb-1">
+                Selected Location:
+              </h4>
               <p className="text-white text-sm">{gps.name}</p>
               <p className="text-gray-400 text-xs">
                 Coordinates: {gps.lat.toFixed(6)}, {gps.lng.toFixed(6)}
@@ -352,8 +363,8 @@ export default function LostItemForm() {
 
           <div>
             <label className="block mb-2 font-bold">Photos</label>
-            <FileUploadArea 
-              files={files} 
+            <FileUploadArea
+              files={files}
               setFiles={setFiles}
               onUploadStatusChange={setIsUploadingImages}
             />
@@ -367,12 +378,12 @@ export default function LostItemForm() {
           onClick={handleSubmit}
           disabled={isUploadingImages}
           className={`w-48 p-3 rounded-md font-bold mt-6 text-black transition-colors ${
-            isUploadingImages 
-              ? 'bg-gray-400 cursor-not-allowed' 
-              : 'bg-green-400 hover:bg-green-500'
+            isUploadingImages
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-green-400 hover:bg-green-500"
           }`}
         >
-          {isUploadingImages ? 'Uploading Images...' : 'Post'}
+          {isUploadingImages ? "Uploading Images..." : "Post"}
         </button>
       </div>
     </div>

@@ -6,7 +6,7 @@ import GmapLocationFetch from "@/components/map/NewGmapLocationFetch";
 import { useRouter } from "next/navigation";
 import { FaLocationArrow } from "react-icons/fa6";
 
-import toast, { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from "react-hot-toast";
 
 import { useUser } from "@clerk/clerk-react";
 
@@ -58,7 +58,7 @@ export default function FoundItemForm() {
   const [gps, setGps] = useState({
     lat: 7.487718248208046,
     lng: 80.36427172854248,
-    name: "Default Location"
+    name: "Default Location",
   });
 
   // Fetch current location on component mount
@@ -74,7 +74,7 @@ export default function FoundItemForm() {
           setGps({
             lat: position.coords.latitude,
             lng: position.coords.longitude,
-            name: "Current Location"
+            name: "Current Location",
           });
           toast.success("Location updated successfully!");
         },
@@ -85,7 +85,7 @@ export default function FoundItemForm() {
         {
           enableHighAccuracy: true,
           timeout: 10000,
-          maximumAge: 300000
+          maximumAge: 300000,
         }
       );
     } else {
@@ -98,7 +98,7 @@ export default function FoundItemForm() {
     setGps({
       lat: newLocation.lat,
       lng: newLocation.lng,
-      name: newLocation.name || "Selected Location"
+      name: newLocation.name || "Selected Location",
     });
     console.log("Location updated:", newLocation);
     toast.success("Location selected successfully!");
@@ -117,12 +117,14 @@ export default function FoundItemForm() {
 
   const handleSubmit = async () => {
     // Validate required fields
-    if (!itemNameRef.current?.value ||
+    if (
+      !itemNameRef.current?.value ||
       !foundDate ||
       !phoneRef.current?.value ||
       !categoryRef.current?.value ||
       !locationRef.current?.value ||
-      !descriptionRef.current?.value) {
+      !descriptionRef.current?.value
+    ) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -137,7 +139,9 @@ export default function FoundItemForm() {
       description: descriptionRef.current?.value,
       email: userEmail,
       clerkUserId: user?.id || "", // Add Clerk user ID for notifications
-      photo: files.map(f => (typeof f === "string" ? f : f.url)).filter(Boolean),
+      photo: files
+        .map((f) => (typeof f === "string" ? f : f.url))
+        .filter(Boolean),
       postType: "found",
       gpsName: gps.name, // Include location name
     };
@@ -149,9 +153,9 @@ export default function FoundItemForm() {
       const res = await fetch("/api/post/found", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -159,9 +163,9 @@ export default function FoundItemForm() {
       }
 
       console.log("Response from API:", data);
-      toast.success('Post published successfully!');
+      toast.success("Post published successfully!");
       setTimeout(() => {
-        router.push('/found');
+        router.push("/found");
       }, 1500);
     } catch (error) {
       console.error("Error posting data:", error);
@@ -177,9 +181,7 @@ export default function FoundItemForm() {
         {/* Left side: Form fields */}
         <div className="space-y-6 md:w-1/2">
           <div>
-            <label className="block mb-2 font-bold">
-              Found Item Name / Title
-            </label>
+            <label className="block mb-2 font-bold">Name / Title</label>
             <input
               ref={itemNameRef}
               maxLength={50}
@@ -225,6 +227,7 @@ export default function FoundItemForm() {
                 Select Category
               </option>
               <option value="Personal">Personal</option>
+              <option value="Vehicle">Vehicle</option>
               <option value="Electronics">Electronics</option>
               <option value="People">People</option>
               <option value="Pets & Animals">Pets & Animals</option>
@@ -264,11 +267,15 @@ export default function FoundItemForm() {
         {/* Right side:  Map and File Upload */}
         <div className="space-y-6 md:w-1/2">
           <div>
-            <h3 className="text-left font-semibold mb-4">Select Found Location</h3>
+            <h3 className="text-left font-semibold mb-4">
+              Select Found Location
+            </h3>
 
             {/* Location Info Display */}
             <div className="bg-gray-800 p-3 rounded-lg mb-4">
-              <h4 className="font-medium text-sm text-gray-300 mb-1">Selected Location:</h4>
+              <h4 className="font-medium text-sm text-gray-300 mb-1">
+                Selected Location:
+              </h4>
               <p className="text-white text-sm">{gps.name}</p>
               <p className="text-gray-400 text-xs">
                 Coordinates: {gps.lat.toFixed(6)}, {gps.lng.toFixed(6)}
@@ -302,8 +309,8 @@ export default function FoundItemForm() {
 
           <div>
             <label className="block mb-2 font-bold">Photos</label>
-            <FileUploadArea 
-              files={files} 
+            <FileUploadArea
+              files={files}
               setFiles={setFiles}
               onUploadStatusChange={setIsUploadingImages}
             />
@@ -317,12 +324,12 @@ export default function FoundItemForm() {
           onClick={handleSubmit}
           disabled={isUploadingImages}
           className={`w-48 p-3 rounded-md font-bold mt-6 text-black transition-colors ${
-            isUploadingImages 
-              ? 'bg-gray-400 cursor-not-allowed' 
-              : 'bg-green-400 hover:bg-green-500'
+            isUploadingImages
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-green-400 hover:bg-green-500"
           }`}
         >
-          {isUploadingImages ? 'Uploading Images...' : 'Post'}
+          {isUploadingImages ? "Uploading Images..." : "Post"}
         </button>
       </div>
     </div>

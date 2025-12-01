@@ -5,6 +5,7 @@ import { FaFilter, FaTimes } from "react-icons/fa";
 import { IoBagRemove } from "react-icons/io5";
 import { MdOutlinePhoneIphone, MdFace, MdOutlinePets } from "react-icons/md";
 import { RiShapesFill } from "react-icons/ri";
+import { FaCar } from "react-icons/fa6";
 
 export const SearchBar = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,6 +16,7 @@ export const SearchBar = () => {
   const filterCategories = [
     { name: "Reset", icon: <FaTimes /> },
     { name: "Personal", icon: <IoBagRemove /> },
+    { name: "Vehicle", icon: <FaCar /> },
     { name: "Electronics", icon: <MdOutlinePhoneIphone /> },
     { name: "People", icon: <MdFace /> },
     { name: "Pets & Animals", icon: <MdOutlinePets /> },
