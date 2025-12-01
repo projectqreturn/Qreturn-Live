@@ -343,8 +343,8 @@ export async function DELETE(req) {
 
     // Delete image from external API if search_Id exists
     if (existingPost.search_Id) {
-      console.log(`Deleting image with search_Id: ${existingPost.search_Id}`);
-      await deleteImageFromExternalApi(existingPost.search_Id);
+      console.log(`Deleting lost image with search_Id: ${existingPost.search_Id}`);
+      await deleteImageFromExternalApi(existingPost.search_Id, 'lost');
     }
 
     // Delete the post

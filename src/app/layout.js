@@ -3,7 +3,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import PWARegistration from "@/components/pwa/PWARegistration";
-import PushNotificationProvider from "@/app/lib/notification/PushNotificationProvider";
+
 import { Toaster } from "react-hot-toast";
 import { Analytics } from '@vercel/analytics/next';
 
@@ -66,11 +66,7 @@ export default function RootLayout({ children }) {
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <PWARegistration />
-          <PushNotificationProvider>
-            <Toaster position="top-right" />
-            {children}
-            <Analytics />
-          </PushNotificationProvider>
+          {children}
         </body>
       </html>
     </ClerkProvider>

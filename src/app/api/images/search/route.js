@@ -27,9 +27,10 @@ export async function POST(req) {
     const externalFormData = new FormData();
     externalFormData.append("file", file);
 
-    // Send image to external search API
+    // Send image to external search API with type-specific endpoint
     const baseUrl = process.env.NEXT_PUBLIC_IMAGE_API_URL || "http://18.136.211.184:8000";
-    const searchResponse = await fetch(`${baseUrl}/search-image`, {
+    const endpoint = postType === 'lost' ? 'search-lost-image' : 'search-found-image';
+    const searchResponse = await fetch(`${baseUrl}/${endpoint}`, {
       method: "POST",
       body: externalFormData,
     });
@@ -72,21 +73,42 @@ export async function POST(req) {
       }).sort({ createdAt: -1 });
     }
 
-    // Sort posts by score from search results
+    // Sort posts by score from search results (highest score first)
     const scoreMap = {};
     searchResults.results.forEach(result => {
+      // Store score by ID (handle both with and without extension)
       scoreMap[result.id] = result.score;
+      // Also store without extension for flexibility
+      const idWithoutExt = result.id.replace(/\.[^/.]+$/, "");
+      scoreMap[idWithoutExt] = result.score;
     });
 
+    // Sort posts by similarity score (highest first)
     posts.sort((a, b) => {
-      const scoreA = scoreMap[a.search_Id] || 0;
-      const scoreB = scoreMap[b.search_Id] || 0;
-      return scoreB - scoreA; // Higher score first
+      const searchIdA = a.search_Id || "";
+      const searchIdB = b.search_Id || "";
+      const searchIdAWithoutExt = searchIdA.replace(/\.[^/.]+$/, "");
+      const searchIdBWithoutExt = searchIdB.replace(/\.[^/.]+$/, "");
+      
+      const scoreA = scoreMap[searchIdA] || scoreMap[searchIdAWithoutExt] || 0;
+      const scoreB = scoreMap[searchIdB] || scoreMap[searchIdBWithoutExt] || 0;
+      return scoreB - scoreA; // Higher score first (descending order)
+    });
+
+    // Add similarity score to each post for frontend display
+    const postsWithScores = posts.map(post => {
+      const searchId = post.search_Id || "";
+      const searchIdWithoutExt = searchId.replace(/\.[^/.]+$/, "");
+      const score = scoreMap[searchId] || scoreMap[searchIdWithoutExt] || 0;
+      return {
+        ...post.toObject(),
+        similarityScore: score
+      };
     });
 
     return NextResponse.json({
       message: "Search completed successfully",
-      posts,
+      posts: postsWithScores,
       searchResults,
       postType,
     });
