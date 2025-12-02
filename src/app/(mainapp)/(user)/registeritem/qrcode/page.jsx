@@ -12,7 +12,7 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [itemId, setItemId] = useState(null);
-  const [qrValue, setQrValue] = useState("https://qreturn.vercel.app");
+  const [qrValue, setQrValue] = useState("https://qreturn.life");
 
   // Read query param on client-side only to avoid useSearchParams CSR bailout
   useEffect(() => {
