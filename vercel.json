@@ -1,8 +1,0 @@
-{
-  "rewrites": [
-    {
-      "source": "/image-api/:path*",
-      "destination": "http://54.254.188.12:8000/:path*"
-    }
-  ]
-}
