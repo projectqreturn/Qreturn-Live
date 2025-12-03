@@ -195,9 +195,16 @@ export default function AccountVerification() {
   }
 
   return (
-    <div className="sm:w-[870px] w-full mx-auto bg-slate-900 p-6 rounded-lg">
+    <div className="sm:w-[870px] w-full mx-auto bg-slate-900 p-6 rounded-lg opacity-50 pointer-events-none select-none relative">
+      {/* Temporarily Unavailable Overlay */}
+      <div className="absolute inset-0 flex items-center justify-center z-10">
+        <div className="bg-slate-900/80 px-6 py-3 rounded-lg border border-slate-600">
+          <p className="text-white text-lg font-semibold">Temporarily Unavailable</p>
+        </div>
+      </div>
+      
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-white text-2xl font-bold mb-4">
+        <h1 className="text-white/40 text-2xl font-bold mb-4">
           Account Verification
         </h1>
 
@@ -205,13 +212,13 @@ export default function AccountVerification() {
           <div className="flex flex-col md:flex-row gap-8 w-full">
             <div className="flex-1">
               <div className="mb-6">
-                <span className="text-white text-lg">
+                <span className="text-white/50 text-lg">
                   Your Account Status:{" "}
                 </span>
                 {isVerified ? (
-                  <span className="text-green-500 font-bold">Verified</span>
+                  <span className="text-green-500/50 font-bold">Verified</span>
                 ) : (
-                  <span className="text-amber-500 font-bold">Not Verified</span>
+                  <span className="text-amber-500/50 font-bold">Not Verified</span>
                 )}
               </div>
 
