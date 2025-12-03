@@ -233,7 +233,7 @@ export default function FoundItemForm() {
           </div>
 
           <div>
-            <label className="block mb-2 font-bold">Description</label>
+            <label className="block mb-2 font-bold">Description.</label>
             <textarea
               ref={descriptionRef}
               maxLength={3000}
