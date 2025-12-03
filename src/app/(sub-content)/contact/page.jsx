@@ -22,7 +22,7 @@ export default function ContactForm() {
         </p>
 
         <p className="text-xl font-semibold text-green-300">
-          support@qreturn.app
+          Projectqreturn@gmail.com
         </p>
 
         <p className="text-sm text-gray-300">

@@ -71,7 +71,7 @@ export default function Privacy() {
             </h2>
             <ul className="list-disc list-inside mt-4 text-sm text-gray-300 space-y-1">
               <li>End-to-end encrypted chat</li>
-              <li>Minimal data sharing</li>
+              <li>Minimal data Sharing</li>
               <li>Regular security updates</li>
               <li>Secure encrypted servers</li>
             </ul>

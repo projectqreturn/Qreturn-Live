@@ -14,7 +14,7 @@ export default function Tearms() {
 
           <div className="text-center">
             <div className="inline-block bg-red-500 text-white text-sm px-4 py-1 rounded-full">
-              Effective Date: April 13, 2025
+              Effective Date: April 14, 2025
             </div>
             <p className="mt-4 text-sm text-gray-300">
               These Terms & Conditions govern your use of the QReturn platform.
