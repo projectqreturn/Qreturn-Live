@@ -6,7 +6,7 @@ const isProtectedRoute = createRouteMatcher([
   "/notifications(.*)",
   "/myitems(.*)",
   "/chats(.*)",
-  "/image-search(.*)",
+  
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
