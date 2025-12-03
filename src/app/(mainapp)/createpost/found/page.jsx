@@ -257,7 +257,7 @@ export default function FoundItemForm() {
             <label className="block mb-2 font-bold">Description</label>
             <textarea
               ref={descriptionRef}
-              maxLength={300}
+              maxLength={3000}
               placeholder="Details about the item: color, brand, unique identifiers, condition, etc."
               className="w-full p-3 bg-gradient-to-b from-white to-[#959595] placeholder-[#6B7280] text-black rounded-md h-32"
             />
