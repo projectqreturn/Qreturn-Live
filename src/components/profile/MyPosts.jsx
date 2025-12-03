@@ -2,10 +2,13 @@
 import { useState, useEffect } from "react";
 import { MdEdit } from "react-icons/md";
 import { RiDeleteBin6Line } from "react-icons/ri";
+import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 import Link from "next/link";
 import Image from "next/image";
 import { useUser } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
+
+const POSTS_PER_PAGE = 10;
 
 // Reusable Post Card Component
 const PostCard = ({ post, onDelete, onEdit, postType }) => {
@@ -67,6 +70,10 @@ export default function PostsApp() {
     type: null,
   });
 
+  // Pagination state
+  const [lostPostsPage, setLostPostsPage] = useState(1);
+  const [foundPostsPage, setFoundPostsPage] = useState(1);
+
   const urlFound = "/api/post/found?";
   const urlLost = "/api/post/lost?";
 
@@ -83,33 +90,53 @@ export default function PostsApp() {
   useEffect(() => {
     if (!userEmail) return; // Don't fetch if email is not set
 
-    const fetchPosts = async (type) => {
+    const fetchAllPosts = async (type) => {
       const endpoint = type === "found" ? urlFound : urlLost;
-      const newEndPoint = `${endpoint}userEmail=${userEmail}`;
-      try {
-        const res = await fetch(newEndPoint, { cache: "no-store" });
-        const data = await res.json();
+      let allPosts = [];
+      let page = 1;
+      let hasMore = true;
 
-        // Validate response format
-        const list = Array.isArray(data.posts) ? data.posts : [];
+      // Fetch all pages
+      while (hasMore) {
+        const newEndPoint = `${endpoint}userEmail=${userEmail}&page=${page}`;
+        try {
+          const res = await fetch(newEndPoint, { cache: "no-store" });
+          const data = await res.json();
 
-        // Map data into your UI-friendly structure
-        const mapped = list.map((p) => ({
-          id: type === "found" ? p.foundPostId : p.lostPostId,
-          title: p.title,
-          imageSrc: p.photo?.[0] || "/noimage.png",
-          date: p.createdAt,
-        }));
-
-        if (type === "found") setFoundPosts(mapped);
-        else setLostPosts(mapped);
-      } catch (e) {
-        console.error(`Failed to load ${type} posts:`, e);
+          // Validate response format
+          const list = Array.isArray(data.posts) ? data.posts : [];
+          
+          if (list.length === 0) {
+            hasMore = false;
+          } else {
+            allPosts = [...allPosts, ...list];
+            // Check if there are more pages
+            if (page >= data.totalPages) {
+              hasMore = false;
+            } else {
+              page++;
+            }
+          }
+        } catch (e) {
+          console.error(`Failed to load ${type} posts:`, e);
+          hasMore = false;
+        }
       }
+
+      // Map data into your UI-friendly structure
+      const mapped = allPosts.map((p) => ({
+        id: type === "found" ? p.foundPostId : p.lostPostId,
+        title: p.title,
+        imageSrc: p.photo?.[0] || "/noimage.png",
+        date: p.createdAt,
+      }));
+
+      if (type === "found") setFoundPosts(mapped);
+      else setLostPosts(mapped);
     };
 
-    fetchPosts("found");
-    fetchPosts("lost");
+    fetchAllPosts("found");
+    fetchAllPosts("lost");
   }, [userEmail]);
 
   const handleDeleteClick = (postId, type) => {
@@ -138,9 +165,21 @@ export default function PostsApp() {
 
         // Remove from local state
         if (deleteModal.type === "lost") {
-          setLostPosts(lostPosts.filter((post) => post.id !== postId));
+          const newLostPosts = lostPosts.filter((post) => post.id !== postId);
+          setLostPosts(newLostPosts);
+          // Reset to last valid page if current page becomes empty
+          const newTotalPages = Math.ceil(newLostPosts.length / POSTS_PER_PAGE);
+          if (lostPostsPage > newTotalPages && newTotalPages > 0) {
+            setLostPostsPage(newTotalPages);
+          }
         } else {
-          setFoundPosts(foundPosts.filter((post) => post.id !== postId));
+          const newFoundPosts = foundPosts.filter((post) => post.id !== postId);
+          setFoundPosts(newFoundPosts);
+          // Reset to last valid page if current page becomes empty
+          const newTotalPages = Math.ceil(newFoundPosts.length / POSTS_PER_PAGE);
+          if (foundPostsPage > newTotalPages && newTotalPages > 0) {
+            setFoundPostsPage(newTotalPages);
+          }
         }
 
         // Close modal
@@ -164,6 +203,52 @@ export default function PostsApp() {
     setDeleteModal({ isOpen: false, postId: null, type: null });
   };
 
+  // Pagination calculations
+  const lostPostsTotalPages = Math.ceil(lostPosts.length / POSTS_PER_PAGE);
+  const foundPostsTotalPages = Math.ceil(foundPosts.length / POSTS_PER_PAGE);
+
+  const paginatedLostPosts = lostPosts.slice(
+    (lostPostsPage - 1) * POSTS_PER_PAGE,
+    lostPostsPage * POSTS_PER_PAGE
+  );
+
+  const paginatedFoundPosts = foundPosts.slice(
+    (foundPostsPage - 1) * POSTS_PER_PAGE,
+    foundPostsPage * POSTS_PER_PAGE
+  );
+
+  // Pagination component
+  const PaginationControls = ({ currentPage, totalPages, onPageChange, totalItems }) => {
+    if (totalPages <= 1) return null;
+
+    return (
+      <div className="flex items-center justify-between mt-4 px-2">
+        <span className="text-sm text-gray-400">
+          Showing {((currentPage - 1) * POSTS_PER_PAGE) + 1}-{Math.min(currentPage * POSTS_PER_PAGE, totalItems)} of {totalItems}
+        </span>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <MdChevronLeft size={20} className="text-white" />
+          </button>
+          <span className="text-sm text-gray-300 px-2">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <MdChevronRight size={20} className="text-white" />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="sm:w-[870px] w-full mx-auto">
       {/* Title placed at the very top, outside all other containers */}
@@ -178,8 +263,8 @@ export default function PostsApp() {
           <div className="mb-8">
             <h2 className="text-lg font-bold mb-4">Lost Posts</h2>
             <div className="space-y-2">
-              {lostPosts.length > 0 ? (
-                lostPosts.map((post) => (
+              {paginatedLostPosts.length > 0 ? (
+                paginatedLostPosts.map((post) => (
                   <PostCard
                     key={post.id}
                     post={post}
@@ -193,13 +278,19 @@ export default function PostsApp() {
                 </p>
               )}
             </div>
+            <PaginationControls
+              currentPage={lostPostsPage}
+              totalPages={lostPostsTotalPages}
+              onPageChange={setLostPostsPage}
+              totalItems={lostPosts.length}
+            />
           </div>
 
           <div>
             <h2 className="text-lg font-bold mb-4">Found Posts</h2>
             <div className="space-y-2">
-              {foundPosts.length > 0 ? (
-                foundPosts.map((post) => (
+              {paginatedFoundPosts.length > 0 ? (
+                paginatedFoundPosts.map((post) => (
                   <PostCard
                     key={post.id}
                     post={post}
@@ -213,6 +304,12 @@ export default function PostsApp() {
                 </p>
               )}
             </div>
+            <PaginationControls
+              currentPage={foundPostsPage}
+              totalPages={foundPostsTotalPages}
+              onPageChange={setFoundPostsPage}
+              totalItems={foundPosts.length}
+            />
           </div>
 
           {/* Reported Posts Section */}
