@@ -11,22 +11,7 @@
 
 ---
 
-## 📋 Table of Contents
 
-- [About](#about)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-- [Environment Setup](#environment-setup)
-- [Project Structure](#project-structure)
-- [Key Functionalities](#key-functionalities)
-- [API Documentation](#api-documentation)
-- [PWA & Offline Support](#pwa--offline-support)
-- [Deployment](#deployment)
-- [Contributing](#contributing)
-- [License](#license)
-
----
 
 ## 🎯 About
 
