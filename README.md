@@ -93,7 +93,8 @@ View our complete design system on Figma:
 - **Real-time**: [Firebase](https://firebase.google.com/) (Firestore, FCM)
 - **Authentication**: [Clerk](https://clerk.com/)
 - **Image Processing**: [browser-image-compression](https://www.npmjs.com/package/browser-image-compression)
-- **External ML API**: Custom FastAPI server for AI image matching
+- **External ML API**: [Custom FastAPI server for AI image matching](https://github.com/Qreturn-fyp/Image-Search-with-FAISS)
+
 
 ### DevOps & Tools
 - **Package Manager**: npm
