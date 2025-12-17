@@ -45,6 +45,10 @@ export default function SearchPage() {
   }, [results, postType, searchInfo, uploadedImageUrl]);
 
   const handleSearch = async () => {
+    // Feature temporarily disabled
+    toast.error("Image search is currently disabled.");
+    return;
+    
     if (files.length === 0) {
       toast.error("Please upload an image first.");
       return;
@@ -130,6 +134,23 @@ export default function SearchPage() {
             </span>
           </h2>
         </div>
+        
+        {/* Service Disabled Notice */}
+        <div className="bg-red-950/40 border border-red-900 rounded-lg p-4 mb-4 text-white">
+          <div className="flex items-start gap-3">
+            <PiWarningCircleBold
+              className="text-red-500 w-6 h-6 flex-shrink-0 mt-0.5"
+              aria-hidden="true"
+            />
+            <div className="text-left">
+              <h3 className="font-semibold text-red-400 mb-2">Service Temporarily Unavailable</h3>
+              <p className="text-white/80 text-sm">
+                AI image search is currently disabled while we manage usage limits. We'll have it back soon. Thanks for your patience!
+              </p>
+            </div>
+          </div>
+        </div>
+        
         <div className="bg-zinc-900/40 border border-zinc-800 rounded-md p-3 text-white/70 text-sm not-italic flex items-start">
           <PiWarningCircleBold
             className="text-yellow-700 w-6 h-6 flex-shrink-0 mr-3 mt-1"
@@ -147,7 +168,9 @@ export default function SearchPage() {
       {/* Upload Section */}
       {results.length === 0 && (
         <>
-          <FileUploadArea files={files} setFiles={setFiles} />
+          <div className="opacity-50 pointer-events-none">
+            <FileUploadArea files={files} setFiles={setFiles} />
+          </div>
 
           {/* Radio Buttons */}
           <div className="flex justify-center items-center mt-10 space-x-10 text-sm">
@@ -199,10 +222,10 @@ export default function SearchPage() {
           {/* Search Button */}
           <button
             onClick={handleSearch}
-            disabled={isSearching}
+            disabled={true}
             className="mt-6 px-6 py-3 bg-[#00FF91] text-black rounded-md font-semibold hover:bg-[#00e580] transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSearching ? "Searching..." : "Search similar posts"}
+            Service Temporarily Disabled
           </button>
         </>
       )}
