@@ -11,22 +11,7 @@
 
 ---
 
-## 📋 Table of Contents
 
-- [About](#about)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-- [Environment Setup](#environment-setup)
-- [Project Structure](#project-structure)
-- [Key Functionalities](#key-functionalities)
-- [API Documentation](#api-documentation)
-- [PWA & Offline Support](#pwa--offline-support)
-- [Deployment](#deployment)
-- [Contributing](#contributing)
-- [License](#license)
-
----
 
 ## 🎯 About
 
@@ -108,7 +93,8 @@ View our complete design system on Figma:
 - **Real-time**: [Firebase](https://firebase.google.com/) (Firestore, FCM)
 - **Authentication**: [Clerk](https://clerk.com/)
 - **Image Processing**: [browser-image-compression](https://www.npmjs.com/package/browser-image-compression)
-- **External ML API**: Custom FastAPI server for AI image matching
+- **External ML API**: [Custom FastAPI server for AI image matching](https://github.com/Qreturn-fyp/Image-Search-with-FAISS)
+
 
 ### DevOps & Tools
 - **Package Manager**: npm
